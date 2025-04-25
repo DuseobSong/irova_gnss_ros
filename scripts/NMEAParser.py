@@ -2,6 +2,9 @@ import os, sys
 import json
 import time
 from queue import Queue
+import rospy
+
+from rospkg import RosPack
 
 # Directional indicator
 E = 0
@@ -37,27 +40,43 @@ START_CH = 0x23
 END_CH_1 = 0x0D
 END_CH_2 = 0x0A
 
+rp = RosPack()
+ROOT_PKG_DIR = rp.get_path('irova_gnss_ros')
+
 
 class NMEAParser:
-    def __init__(self):
-        self.rx_buffer = bytearray()
-        self.nmea_queue = []
-        self.gga_queue = []
+    def __init__(self, parameters):
+        self.parameters                 = parameters
+        self.nmea_info_dir              = ROOT_PKG_DIR + '/config/NMEA.json'
+        self.nmea_info                  = None
         
-        self.UTC = None
-        self.latitude = None
-        self.longitude = None
-        self.altitude = None
-        self.n_flag = None
-        self.e_flag = None
+        self.rx_buffer                  = bytearray()
+        self.nmea_queue                 = []
+        self.gga_queue                  = []
         
-        self.gps_quality = None
-        self.mode = None
-        self.fix_type = None
-        self.status = None
+        self.UTC                        = None
+        self.latitude                   = None
+        self.longitude                  = None
+        self.altitude                   = None
+        self.n_flag                     = None
+        self.e_flag                     = None
         
-        self.operation = True
-        self.location_update_flag = False
+        self.gps_quality                = None
+        self.mode                       = None
+        self.fix_type                   = None
+        self.status                     = None
+        
+        self.operation                  = True
+        self.gnss_info_update_flag   = False
+        
+    def load_nmea_info(self):
+        try:
+            with open(self.nmea_info_dir) as f:
+                self.nmea_info = json.loads(f.read())
+            return True
+        except Exception as e:
+            rospy.logerr('[NMEA] Parser loading failed: {}'.format(e))
+            return False
         
     def checksum(self, string):
         val = 0
@@ -72,10 +91,10 @@ class NMEAParser:
         return val
     
     def set_operation(self, cmd_queue: Queue):
-        ret = True
         if cmd_queue.qsize() != 0:
-            ret = False
-        return ret
+            return False
+        else: 
+            return True
         
     def retrieve_rx_bytes(self, rx_buffer: Queue):
         initial_length = len(self.rx_buffer)
@@ -139,7 +158,7 @@ class NMEAParser:
         # else:
         #     rest = barray[last_end_idx+1:]
 
-        return msg_found, messages, rest
+        return msg_found, messages, rest # bool, list(bytearray), bytearray
     
     def split_message_packet(self, barray: bytearray):
         header, tail = barray.split(b'*')
@@ -153,7 +172,8 @@ class NMEAParser:
         if ret:
             msg_fields = header.decode('ascii').split(',')
 
-            head = msg_fields[0], payload = msg_fields[1:]
+            head = msg_fields[0]
+            payload = msg_fields[1:]
             
         return ret, head, payload
     
@@ -207,7 +227,7 @@ class NMEAParser:
             self.gps_quality    = payload[4]
             self.altitude       = float(payload[7])
             
-            self.location_upadte_flag = True
+            self.gnss_info_update_flag = True
         
     def parse_gll_message(self, payload: list):
         tmp_UTC            = float(payload[4])
@@ -219,7 +239,7 @@ class NMEAParser:
             self.longitude      = float(payload[2])
             self.e_indicator    = payload[3]
             
-            self.location_upadte_flag = True
+            self.gnss_info_update_flag = True
         
     def parse_gsa_message(self, payload: list):
         self.fix_type = payload[1]
@@ -235,9 +255,10 @@ class NMEAParser:
             self.longitude      = float(payload[4])
             self.e_indicator    = payload[5]
 
-            self.location_upadte_flag = True
+            self.gnss_info_update_flag = True
         
-    def parse_NMEA_message(self, nmea_gga_buffer: Queue, nmea_buffer: Queue):
+    def parse_NMEA_message(self, nmea_gga_buffer: Queue, nmea_buffer: Queue,
+                           nmea_gga_log_buffer: Queue, nmea_log_buffer: Queue):
         msg_found, messages, rest = self.search_nmea_message_packet(self.rx_buffer) 
         self.rx_buffer = rest
         if msg_found:
@@ -245,47 +266,65 @@ class NMEAParser:
                 valid_msg, msg_type, payload = self.split_message_packet(msg)
                 if valid_msg:
                     if msg_type.endswith("GGA"):
-                        nmea_gga_buffer.put(msg)
-                        nmea_buffer.put(msg)
+                        nmea_gga_buffer.put(msg)    # msg: bytearray
+                        if nmea_gga_log_buffer is not None:
+                            nmea_gga_log_buffer.put(msg)
+                        nmea_buffer.put(msg)        # msg: bytearray
+                        if nmea_log_buffer is not None:
+                            nmea_log_buffer.put(msg)
                         self.parse_gga_message(payload)
                     elif msg_type.endswith('GLL'):
                         nmea_buffer.put(msg)
+                        if nmea_log_buffer is not None:
+                            nmea_log_buffer.put(msg)
                         self.parse_gll_message(payload)
                     elif msg_type.endswith('GSA'):
                         nmea_buffer.put(msg)
+                        if nmea_log_buffer is not None:
+                            nmea_log_buffer.put(msg)
                         self.parse_gsa_message(payload)
                     elif msg_type.endswith('RMC'):
                         nmea_buffer.put(msg)
+                        if nmea_log_buffer is not None:
+                            nmea_log_buffer.put(msg)    
                         self.parse_rmc_message(payload)
                     else:
                         pass
                 
-    def update_location_info(self, location_info_buffer: Queue):
-        record = (self.UTC, 
-                  self.longitude, 
-                  self.n_indicator, 
-                  self.latitude, 
-                  self.e_indicator,
-                  self.altitude)
+    def update_gnss_info(self, gnss_info_buffer: Queue, gnss_info_log_buffer: Queue):
+        record = {"UTC": self.UTC, 
+                  "LONGITUDE": self.longitude, 
+                  "N_INDICATOR": self.n_indicator, 
+                  "LATITUDE": self.latitude, 
+                  "E_INDICATOR": self.e_indicator,
+                  "ALTITUDE": self.altitude}
         
-        location_info_buffer.put(record)
-        self.location_upadte_flag = False
+        gnss_info_buffer.put(record)
+        if gnss_info_log_buffer is not None:
+            gnss_info_log_buffer.put(record)
+        self.gnss_info_update_flag = False
         
     def run(self, rx_buffer: Queue, 
             nmea_gga_buffer: Queue, 
+            nmea_gga_log_buffer: Queue,
             nmea_buffer: Queue, 
-            location_info_buffer: Queue,
+            nmea_log_buffer: Queue,
+            gnss_info_buffer: Queue,
+            gnss_info_log_buffer: Queue,
             cmd_queue: Queue):
         
         op = True
-        
-        while op:
-            if self.retrieve_rx_bytes(rx_buffer) > 10:
-                self.parse_NMEA_message(nmea_gga_buffer, nmea_buffer)
-            
-            if self.location_upadte_flag:
-                self.update_location_info(location_info_buffer)
-            
-            time.sleep(0.01)
-            
-            op = self.set_operation(cmd_queue)
+        rospy.loginfo("[GNSS] NMEA parser thread started.")
+        try:
+            while op and not rospy.is_shutdown():
+                if self.retrieve_rx_bytes(rx_buffer) > 10:
+                    self.parse_NMEA_message(nmea_gga_buffer, nmea_buffer, nmea_gga_log_buffer, nmea_log_buffer)
+                
+                if self.gnss_info_update_flag:
+                    self.update_gnss_info(gnss_info_buffer, gnss_info_log_buffer)
+                
+                time.sleep(0.01)
+                
+                op = self.set_operation(cmd_queue)
+        finally:
+            rospy.loginfo("[GNSS] NMEA parser thread terminated.")

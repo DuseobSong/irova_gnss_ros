@@ -4,33 +4,39 @@ import serial
 import json
 from queue import Queue
 
+import rospy
+from rospkg import RosPack
+
+rp = RosPack()
+ROOT_PKG_DIR = rp.get_path('irova_gnss_ros')
+
 
 class GNSSSerial:
-    def __init__(self, 
-                 nmea_port, 
-                 rtcm_port,
-                 nmea_baudrate=115200,
-                 rtcm_baudrate=115200, 
-                 parity=serial.PARITY_NONE,
-                 bytesize=serial.EIGHTBITS,
-                 stopbits=serial.STOPBITS_ONE,
-                 timeout=0.05,
-                 reconnect_cnt=0):
-        self.nmea_port      = nmea_port
-        self.nmea_baudrate  = nmea_baudrate
-        self.rtcm_port      = rtcm_port
-        self.rtcm_baudrate  = rtcm_baudrate
-        self.bytesize       = bytesize
-        self.stopbits       = stopbits
-        self.parity         = parity
-        self.timeout        = timeout
-        self.reconnect_cnt  = reconnect_cnt
+    def __init__(self, parameters):
+        self.parameters     = parameters
+        self.nmea_port      = None
+        self.nmea_baudrate  = None
+        self.rtcm_port      = None
+        self.rtcm_baudrate  = None
+        self.bytesize       = serial.EIGHTBITS
+        self.stopbits       = serial.STOPBITS_ONE
+        self.parity         = serial.PARITY_NONE
+        self.timeout        = 0.05
+        self.reconnect_cnt  = 0
         
         self.nmea_ser       = None
         self.rtcm_ser       = None
         
         self.tx_buffer      = bytearray() # RTCM byte buffer to receive from NTRIP caster
         
+        self.set_parameters()
+        
+    def set_parameters(self):
+        self.nmea_port = self.parameters["NMEA_PORT"]
+        self.rtcm_port = self.parameters["RTCM_PORT"]
+        self.nmea_baurdate = self.parameters["NMEA_BAUDRATE"]
+        self.rtcm_baudrate = self.parameters["RTCM_BAUDRATE"]
+    
     def check_operation(self, cmd_queue: Queue):
         ret = True
         if cmd_queue.qsize() != 0:
@@ -133,11 +139,12 @@ class GNSSSerial:
     
     def nmea_run(self, rx_buffer: Queue, rx_log_buffer: Queue, cmd_queue: Queue):
         try:
+            rospy.loginfo('[GNSS] NMEA thread started.')
             self.connect_nmea_serial()
             
             op = True
             
-            while op:
+            while op and not rospy.is_shutdown():
                 # Receive bytes from GNSS-RTK module
                 ret = self.save_bytes_on_rx_buffer(rx_buffer, rx_log_buffer)
                 # If any data received, then pass this RX buffer
@@ -155,14 +162,17 @@ class GNSSSerial:
                     self.nmea_ser.close()
             except:
                 pass
+            rospy.loginfo('[GNSS] NMEA thread terminated.')
             
     def rtcm_run(self, rtcm_buffer: Queue, cmd_queue: Queue):
+        
         try:
+            rospy.loginfo('[GNSS] RTCM thread started.')
             self.connect_rtcm_serial()
             
             op = True
             
-            while op:
+            while op and not rospy.is_shutdown():
                 # Retrieve RTCM v3.2 bytes from RTCM buffer
                 self.write_packet_on_tx_buffer(rtcm_buffer)
                 
@@ -181,5 +191,5 @@ class GNSSSerial:
                     self.rtcm_ser.close()
             except:
                 pass
+            rospy.loginfo('[GNSS] RTCM thread terminated.')
             
-

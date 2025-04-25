@@ -3,6 +3,8 @@ import rospy
 from std_msgs.msg import Bool, UInt8, Float64
 from irova_gnss_ros.msg import *
 
+import traceback
+
 import numpy as np
 import pandas as pd
 from pyproj import Transformer, Proj
@@ -25,22 +27,28 @@ from NTRIPClient import NtripClient
 Root package : irova_gnss_ros
 Serial node: 
 '''
+
+rp = RosPack()
+ROOT_PKG = 'irova_gnss_ros'
+ROOT_PKG_DIR = rp.get_path(ROOT_PKG)
  
 
 class GNSS:
-    def __init__(self, root_pkd_dir, log=False):
+    def __init__(self, log=False):
         self.rate                               = rospy.Rate(0.1)
         
-        self.nmea_parser                        = NMEAParser()
-        self.rtcm_parser                        = RTCMParser()
-        self.gnss_serial                        = GNSSSerial()
-        self.ntrip_client                       = NtripClient()
-        self.data_logger                        = DataLogger()
-        self.gnss_localization                  = GNSSLocalization()
+        self.nmea_parser                        = None # NMEAParser()
+        self.rtcm_parser                        = None # RTCMParser()
+        self.gnss_serial                        = None # GNSSSerial()
+        self.ntrip_client                       = None # NtripClient()
+        self.data_logger                        = None # DataLogger()
+        self.gnss_localization                  = None # GNSSLocalization()
         
         self.rx_buffer                          = Queue()
         self.nmea_gga_buffer                    = Queue()
+        self.nmea_gga_ntrip_buffer              = Queue()
         self.nmea_buffer                        = Queue()
+        self.nmea_ntrip_buffer                  = Queue()
         self.rtcm_buffer                        = Queue()
         self.gnss_info_buffer                   = Queue()
         self.localization_info_buffer           = Queue()
@@ -48,6 +56,8 @@ class GNSS:
         self.command_queue                      = Queue()
         
         self.log_enable                         = log
+        
+        self.system_param                       = None
         
         self.system_operation                   = Queue()
         self.operation                          = True
@@ -72,26 +82,82 @@ class GNSS:
         
         self.lock                               = threading.Lock()
         
-        self.nmea_parser_thread                 = threading.Thread(target=self.nmea_parser.run,         args=(self.rx_buffer, 
-                                                                                                              self.nmea_gga_buffer, 
-                                                                                                              self.nmea_buffer,
-                                                                                                              self.localization_info_buffer,
-                                                                                                              self.command_queue))
-        self.gnss_serial_thread                 = threading.Thread(target=self.gnss_serial.nmea_run,    args=(self.rx_buffer, 
-                                                                                                              self.rx_log_buffer, 
-                                                                                                              self.command_queue))
-        self.gnss_serial_thread                 = threading.Thread(target=self.gnss_serial.rtcm_run,    args=(self.rtcm_buffer, 
-                                                                                                              self.command_queue))
-        self.ntrip_client_thread                = threading.Thread(target=self.ntrip_client.run,        args=())
-        self.gnss_localization_thread           = threading.Thread(target=self.gnss_localization.run,   args=(self.gnss_info_buffer,
-                                                                                                              self.localization_info_buffer,
-                                                                                                              self.localization_info_log_buffer,
-                                                                                                              self.command_queue))
-        if self.log_enable:
-            self.data_logger_thread                 = threading.Thread(target=self.data_logger.run,         args=())
+        self.nmea_parser_thread                 = None
+        self.rtcm_serial_thread                 = None
+        self.nmea_serial_thread                 = None
+        self.ntrip_client_thread                = None
+        self.gnss_localization_thread           = None
+        self.data_logger_thread                 = None
+            
+        self.load_system_paramter()
+        self.set_modules()
+        
+    def raise_error(self, exception):
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        
+        if exc_tb is not None:
+            line_no = exc_tb.tb_lineno
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        else:
+            exc_type = ''
+            line_no = ''
+            fname = ''
+            
+        rospy.logerr(exception)
+        print(exc_type, fname, line_no)
+        print(traceback.format_exc())
             
     def load_system_paramter(self):
-        with open()
+        try:
+            with open(ROOT_PKG_DIR + '/config/system_config.json') as f:
+                self.system_param = json.loads(f.read())
+            return True
+        except Exception as e:
+            self.raise_error(e)
+            return False
+    
+    def set_modules(self):
+        self.nmea_parser                = NMEAParser(self.system_param["NMEA_PARSER"])
+        self.rtcm_parser                = RTCMParser()
+        self.gnss_serial                = GNSSSerial(self.system_param["GNSS_SERIAL"])
+        self.ntrip_client               = NtripClient(self.system_param["NTRIP_CLIENT"])
+        self.data_logger                = DataLogger(self.system_param["DATA_LOGGER"])
+        self.gnss_localization          = GNSSLocalization(self.system_param["GNSS_LOCALIZATION"])
+    
+        self.nmea_serial_thread         = threading.Thread(target=self.gnss_serial.nmea_run,    args=(self.rx_buffer,
+                                                                                                      self.rx_log_buffer,
+                                                                                                      self.command_queue))
+        self.rtcm_serial_thread         = threading.Thread(target=self.gnss_serial.rtcm_run,    args=(self.rtcm_buffer,
+                                                                                                      self.rtcm_log_buffer,
+                                                                                                      self.command_queue))
+        self.ntrip_client_thread        = threading.Thread(target=self.ntrip_client.run,        args=(self.nmea_ntrip_buffer,
+                                                                                                      self.nmea_gga_ntrip_buffer,
+                                                                                                      self.rtcm_buffer,
+                                                                                                      self.rtcm_log_buffer,
+                                                                                                      self.command_queue))
+        self.nmea_parser_thread         = threading.Thread(target=self.nmea_parser.run,         args=(self.rx_buffer,
+                                                                                                      self.nmea_gga_buffer,
+                                                                                                      self.nmea_gga_ntrip_buffer,
+                                                                                                      self.nmea_gga_log_buffer,
+                                                                                                      self.nmea_buffer,
+                                                                                                      self.nmea_ntrip_buffer,
+                                                                                                      self.nmea_log_buffer,
+                                                                                                      self.gnss_info_buffer,
+                                                                                                      self.gnss_info_log_buffer,
+                                                                                                      self.command_queue))
+        self.gnss_localization_thread   = threading.Thread(target=self.gnss_localization.run,   args=(self.gnss_info_buffer,
+                                                                                                      self.localization_info_buffer,
+                                                                                                      self.localization_info_log_buffer,
+                                                                                                      self.command_queue))
+        if self.log_enable:
+            self.data_logger_thread     = threading.Thread(target=self.data_logger.run,         args=(self.rx_log_buffer,
+                                                                                                      self.nmea_gga_log_buffer,
+                                                                                                      self.nmea_buffer,
+                                                                                                      self.localization_info_log_buffer,
+                                                                                                      self.rtcm_log_buffer,
+                                                                                                      self.gnss_info_log_buffer,
+                                                                                                      self.command_queue))
+        
     
     def operation_callback(self, msg: Bool):
         if msg.data == False:
@@ -104,8 +170,10 @@ class GNSS:
         
         if self.nmea_parser_thread.is_alive():
             self.nmea_parser_thread.join()
-        if self.gnss_serial_thread.is_alive():
-            self.gnss_serial_thread.join()
+        if self.rtcm_serial_thread.is_alive():
+            self.rtcm_serial_thread.join()
+        if self.nmea_serial_thread.is_alive():
+            self.nmea_serial_thread.join()
         if self.ntrip_client_thread.is_alive():
             self.ntrip_client_thread.join()
         if self.gnss_localization_thread.is_alive():
@@ -115,7 +183,9 @@ class GNSS:
                 self.data_logger_thread.join()
     
     def check_threads_alive(self):
-        if self.gnss_serial_thread.is_alive():
+        if self.rtcm_serial_thread.is_alive():
+            return False
+        if self.nmea_serial_thread.is_alive():
             return False
         elif self.ntrip_client_thread.is_alive():
             return False
@@ -132,8 +202,10 @@ class GNSS:
             return True
     
     def run(self):
+        self.load_system_paramter()
         try:
-            self.gnss_serial_thread.start()
+            self.rtcm_serial_thread.start()
+            self.nmea_serial_thread.start()
             self.ntrip_client_thread.start()
             self.gnss_localization_thread.start()
             self.nmea_parser_thread.start()
@@ -162,9 +234,7 @@ class GNSS:
         
         
 if __name__ == '__main__':
-    rp = RosPack()
-    ROOT_PKG = 'irova_gnss_ros'
-    root_pkg_dir = rp.get_path(ROOT_PKG)
+    
 
 
     pass

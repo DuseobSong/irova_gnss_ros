@@ -1,9 +1,6 @@
 {
     "COMMON": {
-        "DEVICE": "ZED_F9P_DEV_KIT",
-        "DEFAULT_LATITUDE": ,
-        "DEFAULT_LONGITUDE": ,
-        "DEFAULT_ALTITUDE": ,
+        "DEVICE": "ZED_F9P_DEV_KIT"
     },
     "GNSS_SERIAL": {
         "NMEA_PORT": "/dev/NMEA",
@@ -19,11 +16,11 @@
     },
     "NTRIP_CLIENT": {
         "BUFFER_SIZE": 4096,
-        "USER": "",
+        "USER": "ttngtest01",
         "PSWD": "ngii",
         "PORT": 2101,
-        "CASTER": "",
-        "MOUNTPOINT": "",
+        "CASTER": "RTS2.ngii.go.kr",
+        "MOUNTPOINT": "VRS-RTCM31",
         "USER_AGENT": "NTRIP_CLIENT",
         "HOST": false,
         "SSL": false,
@@ -42,6 +39,10 @@
     "DATA_LOGGER": {
         "UPDATE_INTERVAL": 1.0,
         "LOG_PATH": "",
-        "DATA_TO_SAVE": ["RX_BUFFER", "NMEA", "RTCM"]
+        "DATA_TO_SAVE": ["RX_BUFFER", "NMEA", "RTCM"],
+        "MAX_LINE": 2000,
+        "MAX_BYTES": 1e8,
+        "LOCALIZATION_INFO_ATTRIBUTES": ["UTC", "LONGITUDE", "N_INDICATOR", "LATITUDE", "E_INDICATOR", "ALTITUDE", "V_E", "V_N", "MEA_E", "MEA_N", "MEA_TH", "KAL_E", "KAL_N", "KAL_TH"],
+        "GNSS_INFO_ATTRIBUTES": ["UTC", "LONGITUDE", "N_INDICATOR", "LATITUDE", "E_INDICATOR", "ALTITUDE"]
     }
 }

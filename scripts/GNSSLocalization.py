@@ -5,41 +5,51 @@ import json
 import numpy as np
 from queue import Queue
 
+import rospy
+from rospkg import RosPack
+
+rp = RosPack()
+ROOT_PKG_DIR = rp.get_path('irova_gnss_ros')
+
+def deg2rad(deg):
+    return deg * np.pi / 180.0
+
 
 class GNSSLocalization:
-    def __init__(self, epsg, epsg_proj4_path):
-        self.epsg = epsg
-        self.epsg_proj4_path = epsg_proj4_path
-        self.epsg_string_from = None
-        self.epsg_string_to = None
+    def __init__(self, parameters):
+        self.parameters         = parameters
         
-        self.UTC = None
-        self.n_indicator = None
-        self.e_indicator = None
-        self.latitude = 0.0
-        self.longitude = 0.0
-        self.altitude = 0.0
-        self.origin_latitude = 0.0
-        self.origin_longitude = 0.0
-        self.prev_e = 0.0
-        self.prev_n = 0.0
-        self.e = 0.0
-        self.n = 0.0
-        self.prev_e = 0.0
-        self.prev_n = 0.0
-        self.pred_e = 0.0
-        self.pred_n = 0.0
-        self.orientation = 0.0 # Radian, Velocity vector direction
-        self.ve = 0.0
-        self.vn = 0.0
-        self.ae = 0.0
-        self.an = 0.0
-        self.cur_timestamp = 0.0
-        self.prev_timestamp = 0.0
-        self.dt = 0.0
+        self.epsg               = None
+        self.epsg_proj4_path    = ROOT_PKG_DIR + '/config/EPSG.json'
+        self.epsg_string_from   = None
+        self.epsg_string_to     = None
         
-        self.proj_from = None
-        self.proj_to = None
+        self.UTC                = None
+        self.n_indicator        = None
+        self.e_indicator        = None
+        self.latitude           = 0.0
+        self.longitude          = 0.0
+        self.altitude           = 0.0
+        self.origin_latitude    = None
+        self.origin_longitude   = None
+        self.prev_e             = None
+        self.prev_n             = None
+        self.e                  = None
+        self.n                  = None
+        self.orientation        = 0.0 # Radian, Velocity vector direction
+        self.pred_e             = 0.0
+        self.pred_n             = 0.0
+        self.pred_orientation   = 0.0
+        self.ve                 = 0.0
+        self.vn                 = 0.0
+        self.ae                 = 0.0
+        self.an                 = 0.0
+        self.cur_timestamp      = 0.0
+        self.prev_timestamp     = 0.0
+        self.dt                 = 0.0
+        
+        self.proj_from          = None
+        self.proj_to            = None
         
         # Kalman filter
         self.A = np.array([[1, 1, 0, 0],
@@ -53,8 +63,27 @@ class GNSSLocalization:
         self.P = 4 * np.eye(4) # initial state covariance matrix
         self.X = np.array([0,0,0,0]).T
         
+        self.set_parameters()
+        
     def dm2deg(self, dm):
         return dm // 1e2 + (dm % 1e2) / 60.0
+    
+    def set_operation(self, cmd_queue: Queue):
+        if cmd_queue.qsize() != 0:
+            return False
+        else:
+            return True
+    
+    def set_parameters(self):
+        self.epsg = self.parameters["EPSG"]
+        if 'ORIGIN_LATITUDE' in self.parameters.keys():
+            self.origin_latitude = self.parameters["ORIGIN_LATITUDE"]
+            self.origin_longitude = self.parameters["ORIGIN_LONGITUDE"]
+            
+        if self.load_epsg():
+            return True
+        else:
+            return False
     
     def load_epsg(self):
         with open(self.epsg_proj4_path) as f:
@@ -68,12 +97,6 @@ class GNSSLocalization:
         else:
             print('[LOCALIZATION] Error - Invalid EPSG : {}'.format(self.epsg))
             return False
-        
-    def set_operation(self, cmd_queue: Queue):
-        ret = True
-        if cmd_queue.qsize() != 0:
-            ret = False
-        return ret
     
     def set_timestamp(self, utc):
         self.prev_timestamp = self.cur_timestamp
@@ -110,17 +133,21 @@ class GNSSLocalization:
             
         self.dt = dd * 24 * 60 * 60 + dh * 60 * 60 + dm * 60 + ds + dms
         
-    def get_localization_info(self, gnss_info_buffer: Queue):
+    def get_gnss_info(self, gnss_info_buffer: Queue):
         if gnss_info_buffer.qsize() != 0:
             while gnss_info_buffer.qsize() != 0:
-                data = gnss_info_buffer.get()
+                record = gnss_info_buffer.get()
             
-            self.UTC            = data[0]
-            self.longitude      = data[1]
-            self.n_indicator    = data[2]
-            self.latitude       = data[3]
-            self.e_indicator    = data[4]
-            self.altitude       = data[5]
+            self.UTC            = record["UTC"]
+            self.longitude      = record["LONGITUDE"]
+            self.n_indicator    = record["N_INDICATOR"]
+            self.latitude       = record["LATITUDE"]
+            self.e_indicator    = record["E_INDICATOR"]
+            self.altitude       = record["ALTITUDE"]
+            
+            if self.origin_latitude is None:
+                self.origin_latitude = self.latitude
+                self.origin_longitude = self.longitude
             
             return True
         else:
@@ -128,23 +155,54 @@ class GNSSLocalization:
             
     def convert_coordinate(self):
         e, n = pyproj.transform(self.proj_from, self.proj_to, self.longitude, self.latitude)
+        self.kalman_filter(filt="LKF")
+        
+        self.orietnation = self.compute_orientation(e, n)
+        self.pred_orientation = self.compute_orientation(self.pred_e, self.pred_n)
+        
+        self.compute_velocity()
         self.prev_e = self.e
         self.prev_n = self.n
         self.e      = e
         self.n      = n
-        self.compute_velocity()
         
     def compute_velocity(self):
         if self.prev_timestamp != 0.0:
-            dt      = self.cur_timestamp - self.prev_timestamp
-            de      = self.e - self.prev_e
-            dn      = self.n - self.prev_n
+            delta_t      = self.cur_timestamp - self.prev_timestamp
+            delta_e      = self.e - self.prev_e
+            delta_n      = self.n - self.prev_n
             self.prev_ve = self.ve
             self.prev_vn = self.vn
-            self.ve = de / dt
-            self.vn = dn / dt
+            self.ve      = delta_e / delta_t
+            self.vn      = delta_n / delta_t
             
-    def kalman_filter(self):
+    def compute_orientation(self, e, n):
+        ret = 0.0
+        
+        if self.prev_e is None:
+            ret = 0.0
+        else:
+            delta_e = e - self.prev_e
+            delta_n = n - self.prev_n
+                
+            # Direct north as 0 degree
+            if delta_e == 0 and delta_n == 0:
+                ret = deg2rad(0.0)
+            elif delta_e == 0:
+                if delta_n > 0:
+                    ret = deg2rad(0.0)
+                elif delta_n <0:
+                    ret = deg2rad(-180.0)
+            elif delta_n == 0:
+                if delta_e > 0:
+                    ret = deg2rad(270.0)
+                elif delta_e < 0:
+                    ret = deg2rad(90.0)
+            else:
+                ret = np.arctan2(delta_n, delta_e)
+        return ret
+            
+    def kalman_filter(self, filt="LKF"):
         '''
         Input:
             - e
@@ -156,24 +214,48 @@ class GNSSLocalization:
             - pred_e
             - pred_n
         '''
-        X = np.array([self.prev_e, self.prev_ve, self.prev_n, self.prev_vn]).T # state
-        Z = np.array([self.e, self.ve, self.n, self.vn]).T # measurement
+        if filt == "LKF": # Linear Kalman Filter
+            X = np.array([self.prev_e, self.prev_ve, self.prev_n, self.prev_vn]).T # state
+            Z = np.array([self.e, self.ve, self.n, self.vn]).T # measurement
+            
+            Xp = self.A.dot(X)
+            Pp = self.A.dot(self.P).dot(self.A.T) + self.Q
+            
+            K = Pp.dot(self.H.T).dot(np.linalg.inv(self.H.dot(self.P).dot(self.H.T) + self.R))
+            X = Xp + K.dot(Z - self.H.dot(Xp))
+            self.P = Pp - K.dot(self.H).dot(Pp)
+            
+            self.pred_e = X[0]
+            self.pred_n = X[2]
+            
+        elif filt == "EKF": # Extended Kalman Filter
+            pass
         
-        Xp = self.A.dot(X)
-        Pp = self.A.dot(self.P).dot(self.A.T) + self.Q
+        elif filt == "UKF": # Uncented Kalman Filter
+            pass
         
-        K = Pp.dot(self.H.T).dot(np.linalg.inv(self.H.dot(self.P).dot(self.H.T) + self.R))
-        X = Xp + K.dot(Z - self.H.dot(Xp))
-        self.P = Pp - K.dot(self.H).dot(Pp)
-        
-        self.pred_e = X[0]
-        self.pred_n = X[1]
         
     def update_localization_info(self, localization_info_buffer: Queue, localization_info_log_buffer: Queue):
-        record = (self.UTC, self.latitude, self.n_indicator, self.longitude, self.e_indicator, 
-                  self.altitude, self.ve, self.vn, self.pred_e, self.pred_n)
+        record = {
+            "UTC": self.UTC,
+            "LATITUDE": self.latitude,
+            "N_INDICATOR": self.n_indicator,
+            "LONGITUDE": self.longitude,
+            "E_INDICATOR": self.e_indicator,
+            "ALTITUDE": self.altitude,
+            "V_E": self.ve,
+            "V_N": self.vn,
+            "MEA_E": self.e,
+            "MEA_N": self.n,
+            "MEA_TH": self.orientation,
+            "KAL_E": self.pred_e,
+            "KAL_N": self.pred_n,
+            "KAL_TH": self.pred_orientation
+            }
+        
         localization_info_buffer.put(record)
-        localization_info_log_buffer.put(record)
+        if localization_info_log_buffer is not None:
+            localization_info_log_buffer.put(record)
         
     def run(self, 
             gnss_info_buffer: Queue,
@@ -181,15 +263,18 @@ class GNSSLocalization:
             localization_info_log_buffer: Queue,
             cmd_queue: Queue):
         op = True
+        rospy.loginfo('[GNSS] GNSS-Serial thread started.')
         
-        while op:
-            if self.get_localization_info(gnss_info_buffer):
-                self.convert_coordinate()
+        try:
+            while op and not rospy.is_shutdown():
+                if self.get_gnss_info(gnss_info_buffer):
+                    self.convert_coordinate()
+                    
+                    self.update_localization_info(localization_info_buffer, localization_info_log_buffer)
                 
-                self.kalman_filter()
+                time.sleep(0.05)
                 
-                self.update_localization_info(localization_info_buffer, localization_info_log_buffer)
-            
-            time.sleep(0.05)
-            op = self.set_operation(cmd_queue)
+                op = self.set_operation(cmd_queue)
+        finally:
+            rospy.loginfo('[GNSS] GNSS-Serial thread terminated.')
         

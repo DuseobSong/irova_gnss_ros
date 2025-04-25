@@ -8,6 +8,8 @@ import base64
 import time
 import ssl
 
+from rospkg import RosPack
+
 '''
 MESSAGE TYPES
 1001-1004: SATELLITE SPECIFIC MESSAGES INCLUSIVE (GPS)
@@ -111,28 +113,30 @@ Parsing result:
     +-<UNIT>
   
 '''
+rp = RosPack()
+ROOT_PKG_DIR = rp.get_path('irova_gnss_ros')
 
 
 class RTCMParser:
-    def __init__(self, root_pkg_dir, debug=False):
-        self.debug = debug
+    def __init__(self, parameters, debug=False):
+        self.parameters             = parameters
+        self.debug                  = debug
         
-        self.root_pkg_dir  = root_pkg_dir
-        self.datafield_dir = self.root_pkg_dir + '/RTCM_v3_2/DataField.json'
-        self.msg_type_dir  = self.root_pkg_dir + '/RTCM_v3_2/MsgType.json'
+        self.datafield_dir          = ROOT_PKG_DIR + '/RTCM_v3_2/DataField.json'
+        self.msg_type_dir           = ROOT_PKG_DIR + '/RTCM_v3_2/MsgType.json'
         
-        self.datafields = None
-        self.float_data = None
+        self.datafields             = None
+        self.float_data             = None
         
-        self.msg_types = None
-        self.message_number_list = None
-        self.message_group = None
+        self.msg_types              = None
+        self.message_number_list    = None
+        self.message_group          = None
         
-        self.rx_buffer = bytearray()
+        self.rx_buffer              = bytearray()
         
-        self.count_buf = {}
+        self.count_buf              = {}
         
-        self.ASCII_TABLE = [
+        self.ASCII_TABLE            = [
             #  0     1      2      3      4      5      6      7      8      9
             'NUL', 'SOH', 'STX', 'ETX', 'EOT', 'ENQ', 'ACK', 'BEL', 'BS',  'HT',  # 0
             'LF',  'VT',  'FF',  'CR',  'SO',  'SI',  'DLE', 'DC1', 'DC2', 'DC3', # 10
@@ -812,7 +816,7 @@ class RTCMParser:
         
         return ret
     
-    def parse_glonass_code_phase_bias_meessage(self, packet):
+    def parse_glonass_code_phase_bias_message(self, packet):
         '''
         1230
         '''
