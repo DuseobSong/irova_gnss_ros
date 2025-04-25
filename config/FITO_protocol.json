@@ -1,0 +1,498 @@
+{
+    "COMMAND_CODE": {
+        "DESCRIPTION": "",
+        "LIST": [0, 26, 27, 42, 58, 59, 74, 75, 160, 161, 162, 164, 165, 167, 168],
+        "VALUE": {
+            "PADDING": 0,
+            "REQUEST_BLE_DEVICE_NAME": 26,
+            "REQUEST_BLE_UUID": 27,
+            "SET_BLE_DEVICE_NAME": 42,
+            "REQUEST_SAVED_WIFI_SSID": 58,
+            "REQUEST_SAVED_WIFI_PSWD": 59,
+            "SAVE_WIFI_SSID": 74,
+            "SAVE_WIFI_PSWD": 75,
+            "SET_IDLE_MODE": 160,
+            "SET_NORMAL_MODE": 161,
+            "SET_DEBUG_MODE": 162,
+            "ENABLE_WIFI": 164,
+            "DISABLE_WIFI": 165,
+            "ENABLE_BLE": 167,
+            "DISABLE_BLE": 168
+        }
+    },
+    "COMMAND_RESULT": {
+        "DESCRIPTION": "",
+        "LIST": [1, 15],
+        "VALUE": {
+            "COMMAND_SUCCESS": 1,
+            "COMMAND_FAILED": 15
+        }
+    },
+    "MESSAGE_PACKET_STRUCTURE": {
+        "DESCRIPTION": "Describes byte offset of each data field in GNSS-RTK message packet",
+        "LIST": [],
+        "FIELD": {
+            "COMMON":{
+                "HEADER": {
+                    "MSG": {
+                        "VALUE": "FITO",
+                        "DTYPE": "string",
+                        "OFFSET": 0,
+                        "SIZE": 4
+                    },
+                    "CMD": {
+                        "VALUE": "$CMD",
+                        "DTYPE": "string",
+                        "OFFSET": 0,
+                        "SIZE": 4
+                    }
+                },
+                "TAIL": {
+                    "CRC": {
+                        "DTYPE": "byte",
+                        "OFFSET": -1,
+                        "SIZE": 1 
+                    }
+                },
+                "TYPE": {
+                    "DEBUG": {
+                        "VALUE": 35,
+                        "DTYPE": "BYTE",
+                        "OFFSET": 4
+                    },
+                    "NORMAL": {
+                        "VALUE": 36,
+                        "DTYPE": "BYTE",
+                        "OFFSET": 4
+                    },
+                    "COMMAND_REQ": {
+                        "VALUE": 37,
+                        "DTYPE": "BYTE",
+                        "OFFSET": 4
+                    },
+                    "COMMAND_ACK": {
+                        "VALUE": 38,
+                        "DTYPE": "BYTE",
+                        "OFFSET": 4
+                    }
+                }
+            },
+            "DEBUG": {
+                "PACKING": "<5BHI16sH2BI3Bb3Bf2H3B2qiB9fB",
+                "DATA_LENGTH": 111,
+                "UNOQUE_CELL_PACKET_NUM": {
+                    "DTYPE":"uint",
+                    "SIZE": 4,
+                    "OFFSET": 7
+                },
+                "CELL_SERIAL_NUM_FW": {
+                    "DTYPE": "string",
+                    "SIZE": 16,
+                    "OFFSET": 11
+                },
+                "DATE": {
+                    "DTYPE": "uint",
+                    "SIZE": 4,
+                    "OFFSET": 27
+                },
+                "UTC": {
+                    "DTYPE": "uint",
+                    "SIZE": 4,
+                    "OFFSET": 31
+                },
+                "BACKUP_LEN_IMU_DIV": {
+                    "DTYPE": "uint",
+                    "SIZE": 1,
+                    "OFFSET": 35
+                },
+                "POS_MOD_NUM_SAT": {
+                    "DTYPE": "uint",
+                    "SIZE": 1,
+                    "OFFSET": 36
+                },
+                "AVG_CN0": {
+                    "DTYPE": "uint",
+                    "SIZE": 1,
+                    "OFFSET": 37
+                },
+                "WIFI_RSSI": {
+                    "DTYPE": "int",
+                    "SIZE": 1,
+                    "OFFSET": 38,
+                    "UNIT": "dB"
+                },
+                "BAT_STATE": {
+                    "DTYPE": "uint",
+                    "SIZE": 1,
+                    "OFFSET": 39,
+                    "UNIT": "%"
+                },
+                "CELL_STATE": {
+                    "DTYPE": "uint",
+                    "SIZE": 1,
+                    "OFFSET": 40
+                },
+                "GPS_VALID": {
+                    "DTYPE": "uint",
+                    "SIZE": 1,
+                    "OFFSET": 41 
+                },
+                "ACD_LOAD": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 42 
+                },
+                "FILTERED_SOG": {
+                    "DTYPE": "uint",
+                    "SIZE": 2,
+                    "OFFSET": 46,
+                    "SCALING": 1e-3,
+                    "UNIT": "m/s"
+                },
+                "COURSE_ANGLE": {
+                    "DTYPE": "uint",
+                    "SIZE": 2,
+                    "OFFSET": 48,
+                    "SCALING": 1e-2,
+                    "UNIT": "degree"
+                },
+                "RESERVED1": {
+                    "DTYPE": "uint",
+                    "SIZE": 1,
+                    "OFFSET": 50
+                },
+                "RESERVED2": {
+                    "DTYPE": "uint",
+                    "SIZE": 1,
+                    "OFFSET": 51
+                },
+                "RESERVED3": {
+                    "DTYPE": "uint",
+                    "SIZE": 1,
+                    "OFFSET": 52
+                },
+                "LATITUDE": {
+                    "DTYPE": "int",
+                    "SIZE": 8,
+                    "OFFSET": 53,
+                    "SCALING": 1e-10,
+                    "UNIT": "degree"
+                },
+                "LONGITUDE": {
+                    "DTYPE": "int",
+                    "SIZE": 8,
+                    "OFFSET": 61,
+                    "SCALING": 1e-10,
+                    "UNIT": "degree"
+                },
+                "ELLIPSOID_HEIGHT": {
+                    "DTYPE": "int",
+                    "SIZE": 4,
+                    "OFFSET": 69,
+                    "SCALING": 1e-3,
+                    "UNIT": "m"
+                },
+                "FILTERED_HR_DATA": {
+                    "DTYPE": "uint",
+                    "SIZE": 1,
+                    "OFFSET": 73,
+                    "UNIT": "bpm"
+                },
+                "ROLL_ANGLE": {
+                    "DTYpE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 74,
+                    "UNIT": "degree"
+                },
+                "PITCH_ANGLE": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 78,
+                    "UNIT": "degree"
+                },
+                "YAW_ANGLE": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 82, 
+                    "UNIT": "degree"
+                },
+                "ACC_N": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 86,
+                    "UNIT": "m/s^2"
+                },
+                "ACC_E": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 90,
+                    "UNIT": "m/s^2"
+                },
+                "ACC_D": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 94,
+                    "UNIT": "m/s^2" 
+                },
+                "VEL_N": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 98,
+                    "UNIT": "m/s"
+                },
+                "VEL_E": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 102,
+                    "UNIT": "m/s"
+                },
+                "VEL_D": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 106,
+                    "UNIT": "m/s"
+                },
+                "CRC": {
+                    "DTYPE": "uchar",
+                    "SIZE": 1,
+                    "OFFSET": 107
+                }
+            },
+            "NORMAL": {
+                "PACKING": "<5BH2I3B2qi12fB",
+                "DATA_LENGTH": 87,
+                "UNOQUE_CELL_PACKET_NUM": {
+                    "DTYPE":"uint",
+                    "SIZE": 4,
+                    "OFFSET": 7
+                },
+                "UTC": {
+                    "DTYPE": "long",
+                    "SIZE": 4,
+                    "OFFSET": 11
+
+                },
+                "POS_MOD_NUM_SAT": {
+                    "DTYPE": "uint",
+                    "SIZE": 1,
+                    "OFFSET": 15
+                },
+                "AVG_CN0": {
+                    "DTYPE": "uint",
+                    "SIZE": 1,
+                    "OFFSET": 16
+                },
+                "CELL_STATE": {
+                    "DTYPE": "uint",
+                    "SIZE": 1,
+                    "OFFSET": 17
+                },
+                "LATITUDE": {
+                    "DTYPE": "int",
+                    "SIZE": 8,
+                    "OFFSET": 18,
+                    "SCALING": 1e-10,
+                    "UNIT": "degree"
+                },
+                "LONGITUDE": {
+                    "DTYPE": "int",
+                    "SIZE": 8,
+                    "OFFSET": 26,
+                    "SCALING": 1e-10,
+                    "UNIT": "degree"
+                },
+                "ELLIPSOID_HEIGHT": {
+                    "DTYPE": "int",
+                    "SIZE": 4,
+                    "OFFSET": 34,
+                    "SCALING": 1e-3,
+                    "UNIT": "m"
+                },
+                "ROLL_ANGLE": {
+                    "DTYpE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 38,
+                    "UNIT": "degree"
+                },
+                "PITCH_ANGLE": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 42,
+                    "UNIT": "degree"
+                },
+                "YAW_ANGLE": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 46, 
+                    "UNIT": "degree"
+                },
+                "ACC_X": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 50,
+                    "UNIT": "m/s^2"
+                },
+                "ACC_Y": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 54,
+                    "UNIT": "m/s^2"
+                },
+                "ACC_Z": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 58,
+                    "UNIT": "m/s^2" 
+                },
+                "GYRO_X": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 62,
+                    "UNIT": "rad/s"
+                },
+                "GYRO_Y": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 66,
+                    "UNIT": "rad/s"
+                },
+                "GYRO_Z": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 70,
+                    "UNIT": "rad/s"
+                },
+                "MAG_X": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 74
+                },
+                "MAG_Y": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 78
+                },
+                "MAG_Z": {
+                    "DTYPE": "float",
+                    "SIZE": 4,
+                    "OFFSET": 82
+                },
+                "CRC": {
+                    "DTYPE": "uchar",
+                    "SIZE": 1,
+                    "OFFSET": 86
+                }
+            },
+            "COMMAND_REQ": {
+                "COMMAND_CODE": {
+                    "DTYPE": "uint",
+                    "SIZE": 1,
+                    "OFFSET": 0
+                },
+                "DATA_FIELD": {
+                    "DTYPE": "char",
+                    "SIZE": 0,
+                    "OFFSET": 1
+                }
+            },
+            "COMMAND_ACK": {
+                "COMMAND_CODE": {
+                    "DTYPE": "uint",
+                    "SIZE": 1,
+                    "OFFSET": 0
+                },
+                "COMMAND_RESULT": {
+                    "DTYPE": "uint",
+                    "SIZE": 1,
+                    "OFFSET": 1
+                },
+                "DATA_FIELD": {
+                    "DTYPE": "char",
+                    "SIZE": 0,
+                    "OFFSET": 2
+                }
+            }
+        }
+    },
+    "FIELD_INDEX": {
+        "DEBUG": {
+            "HEADER_1": 0,
+            "HEADER_2": 1,
+            "HEADER_3": 2,
+            "HEADER_4": 3,
+            "TYPE": 4,
+            "LEN": 5,
+            "SEQ_NO": 6,
+            "SERIAL": 7,
+            "YEAR": 8,
+            "MONTH": 9,
+            "DAY": 10,
+            "UTC": 11,
+            "IMU_DIV": 12,
+            "POS_MODE": 13,
+            "CN0": 14,
+            "RSSI": 15,
+            "BAT_STATE": 16,
+            "CELL_STATE": 17,
+            "GPS_VALID": 18,
+            "ACD_LOAD": 19,
+            "SOG": 20,
+            "COURSE_ANGLE": 21,
+            "RESERVED1": 22,
+            "RESERVED2": 23,
+            "RESERVED3": 24,
+            "LATITUDE": 25,
+            "LONGITUDE": 26,
+            "ALTITUDE": 27,
+            "HR": 28,
+            "ROLL": 29,
+            "PITCH": 30,
+            "YAW": 31,
+            "A_N": 32,
+            "A_E": 33,
+            "A_D": 34,
+            "V_N": 35,
+            "V_E": 36,
+            "V_D": 37,
+            "CRC": 38
+        },
+        "NORMAL": {
+            "HEADER_1": 0,
+            "HEADER_2": 1,
+            "HEADER_3": 2,
+            "HEADER_4": 3,
+            "TYPE": 4,
+            "LEN": 5,
+            "SEQ_NO": 6,
+            "POS_MODE": 7,
+            "CN0": 8,
+            "CELL_STATE": 9,
+            "LATITUDE": 10,
+            "LONGITUDE": 11,
+            "ALTITUDE": 12,
+            "ROLL": 13,
+            "PITCH": 14,
+            "YAW": 15,
+            "A_X": 16,
+            "A_Y": 17,
+            "A_Z": 18,
+            "G_X": 19,
+            "G_Y": 20,
+            "G_Z": 21,
+            "M_X": 22,
+            "M_Y": 23,
+            "M_Z": 24,
+            "CRC": 25
+        },
+        "COMMAND": {
+            "HEADER_1": 0,
+            "HEADER_2": 1,
+            "HEADER_3": 2,
+            "HEADER_4": 3,
+            "TYPE": 4,
+            "LEN": 5,
+            "CMD": 6,
+            "RES": 7
+        }
+    }
+}

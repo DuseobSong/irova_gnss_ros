@@ -1,0 +1,15 @@
+Header header
+float64 x
+float64 y
+float64 th
+float64 lat
+float64 lon
+float64 roll
+float64 pitch
+float64 yaw
+float64 acc_n
+float64 acc_e
+float64 acc_d
+float64 vel_n
+float64 vel_e
+float64 vel_d

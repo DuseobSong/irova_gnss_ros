@@ -1,0 +1,17 @@
+Header header
+string serial_no
+uint32 date
+uint32 time
+uint8 mode
+uint8 cn0
+uint8 gps_valid
+uint8 battery
+uint8 RSSI
+Axis WGS84_origin
+Axis UTM_origin
+Axis WGS84
+Axis UTM
+Axis coordinate
+Angle orientation
+Axis velocity
+Axis acceleration

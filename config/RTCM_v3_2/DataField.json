@@ -1,0 +1,1902 @@
+{
+    "DATA_FIELD_COUNT": 426,
+    "FLOAT_DATA_FIELD": ["DF011", "DF012", "DF014", "DF017", "DF018", "DF025", "DF026", "DF027", "DF028", "DF041", "DF042", "DF044", "DF047", "DF048", "DF050", "DF057", "DF062", "DF063", "DF065", "DF069", "DF070", "DF079", "DF082", "DF083", "DF084", "DF086", "DF087", "DF088", "DF089", "DF090", "DF091", "DF092", "DF094", "DF095", "DF096", "DF097", "DF098", "DF099", "DF100", "DF101", "DF111", "DF112", "DF113", "DF114", "DF115", "DF116", "DF117", "DF118", "DF121", "DF124", "DF125", "DF133", "DF135", "DF156", "DF157", "DF158", "DF159", "DF160", "DF161", "DF162", "DF162", "DF163", "DF164", "DF165", "DF166", "DF167", "DF168", "DF169", "DF171", "DF172", "DF173", "DF174", "DF175", "DF176", "DF178", "DF179", "DF180", "DF181", "DF183", "DF184", "DF185", "DF186", "DF187", "DF188", "DF189", "DF192", "DF193", "DF194", "DF195", "DF196", "DF197", "DF198", "DF199", "DF200", "DF201", "DF206", "DF207", "DF208", "DF209", "DF210", "DF211", "DF218", "DF219", "DF220", "DF221", "DF222", "DF233", "DF237", "DF238", "DF242", "DF243", "DF244", "DF245", "DF365", "DF366", "DF367", "DF368", "DF369", "DF370", "DF371", "DF372", "DF373", "DF376", "DF377", "DF378", "DF383", "DF390", "DF398", "DF400", "DF401", "DF404", "DF405", "DF406", "DF408", "DF423", "DF424", "DF425", "DF426"],
+    "DATA_FIELD_INFO": {
+        "DF001": {
+            "NAME": "Reserved",
+            "DTYPE": "bin:1" 
+        },
+        "DF002": {
+            "NAME": "Message Number",
+            "DTYPE": "uint:12"
+        },
+        "DF003": {
+            "NAME": "Reference Station ID",
+            "DTYPE": "uint:12"
+        },
+        "DF004": {
+            "NAME": "GPS Epoch Time (TOW)",
+            "DTYPE": "uint:30",
+            "SCALE": 1,
+            "UNIT": "ms"
+        },
+        "DF005": {
+            "NAME": "Synchronous GNSS Message Flag",
+            "DTYPE": "uint:1",
+            "VALUES": ["No further GNSS observables referenced to the same Epoch Time will be transmitted.\r\nThis enables the receievr to begin processing the data immediately after the message.",
+                    "The next message will contain observables of another GNSS source referenced to the same Epoch Time."]
+        },
+        "DF006": {
+            "NAME": "No. of GPS Satellite Signals Processed",
+            "DTYPE": "uint:5"
+        },
+        "DF007": {
+            "NAME": "GPS Divergence-free Smoothing Indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["Divergence-free smoothing not used.",
+                    "Divergence-free smoothing used."]
+        },
+        "DF008": {
+            "NAME": "GPS Smoothing Interval",
+            "DTYPE": "bin:2"
+        },
+        "DF009": {
+            "NAME": "GPS Satellite ID",
+            "DTYPE": "uint:6"
+        },
+        "DF010": {
+            "NAME": "GPS L1 Code Indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["C/A Code",
+                    "P(Y) Code Direct"]
+        },
+        "DF011": {
+            "NAME": "GPS L1 Pseudorange",
+            "DTYPE": "uint:24",
+            "SCALE": 0.02,
+            "UNIT": "m"
+        },
+        "DF012": {
+            "NAME": "GPS L1 PhaseRange - L1 Pseudorange",
+            "DTYPE": "int:20",
+            "SCALE": 0.0005,
+            "UNIT": "m"
+        },
+        "DF013": {
+            "NAME": "GPS L1 Lock Time Indicator",
+            "DTYPE": "uint:7"
+        },
+        "DF014": {
+            "NAME": "GPS Integer L1 Pseudorange Modulus Ambiguity",
+            "DTYPE": "uint:8",
+            "SCALE": 299792.458,
+            "UNIT": "m"
+        },
+        "DF015": {
+            "NAME": "GPS L1 CNR",
+            "DTYPE": "uint:8",
+            "SCALE": 0.25,
+            "UNIT": "dB-Hz"
+        },
+        "DF016": {
+            "NAME": "GPS L2 Code Indicator",
+            "DTYPE": "uint:2",
+            "VALUES": ["C/A or L2C code",
+                    "P(Y) code direct",
+                    "P(Y) code cross-correlated",
+                    "Correlated P/Y"]
+        },
+        "DF017": {
+            "NAME": "GPS L2-L1 Pseudorange Difference",
+            "DTYPE": "int:14",
+            "SCALE": 0.02,
+            "UNIT": "m"
+        },
+        "DF018": {
+            "NAME": "GPS L2 PhaseRange - L1 Pseudorange",
+            "DTYPE": "int:20",
+            "SCALE": 0.0005,
+            "UNIT": "m"
+        },
+        "DF019": {
+            "NAME": "GPS L2 Lock Time Indicator",
+            "DTYPE": "uint:7"
+        },
+        "DF020": {
+            "NAME": "GPS L2 CNR",
+            "DTYPE": "uint:8",
+            "SCALE": 0.25,
+            "UNIT": "dB-Hz"
+        }, 
+        "DF021": {
+            "NAME": "ITRF Realization Year",
+            "DTYPE": "uint:6"
+        },
+        "DF022": {
+            "NAME": "GPS Indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["No GPS service supported.",
+                    "GPS service supported."]
+        },
+        "DF023": {
+            "NAME": "GLONASS Indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["No GLONASS service supported.",
+                    "GLONASS service supported."]
+        },
+        "DF024": {
+            "NAME": "GALILEO Indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["No Galileo service supported.",
+                    "Galileo service supported."]
+        },
+        "DF025": {
+            "NAME": "Antenna Ref. Point ECEF-X",
+            "DTYPE": "int:38",
+            "SCALE": 0.0001,
+            "UNIT": "m"
+        },
+        "DF026": {
+            "NAME": "Antenna Ref. Point ECEF-Y",
+            "DTYPE": "int:38",
+            "SCALE": 0.0001,
+            "UNIT": "m"
+        },
+        "DF027": {
+            "NAME": "Antenna Ref. Point ECEF-Z",
+            "DTYPE": "int:38",
+            "SCALE": 0.0001,
+            "UNIT": "m"
+        },
+        "DF028": {
+            "NAME": "Antenna Height",
+            "DTYPE": "uint:16",
+            "SCALE": 0.0001,
+            "UNIT": "m"
+        },
+        "DF029": {
+            "NAME": "Descriptor Counter",
+            "DTYPE": "uint:8"
+        },
+        "DF030": {
+            "NAME": "Antenna Descriptor",
+            "DTYPE": "uint:8"
+        },
+        "DF031": {
+            "NAME": "Antenna Serup ID",
+            "DTYPE": "uint:8"
+        },
+        "DF032": {
+            "NAME": "Serial Number Counter",
+            "DTYPE": "uint:8"
+        },
+        "DF033": {
+            "NAME": "Antenna Serial Number",
+            "DTYPE": "uint:8"
+        },
+        "DF034": {
+            "NAME": "GLONASS Epoch Time (t_k)",
+            "DTYPE": "uint:27",
+            "SCALE": 1,
+            "UNIT": "ms"
+        },
+        "DF035": {
+            "NAME": "No. of GLONASS Satellite Signals Processed",
+            "DTYPE": "uint:5"
+        },
+        "DF036": {
+            "NAME": "GLONASS Divergence-free Smoothing Indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["Divergence-free smoothing not used",
+                    "Divergence-free smoothing used"]
+        },
+        "DF037": {
+            "NAME": "GLONASS Smoothing Interval",
+            "DTYPE": "bin:3"
+        },
+        "DF038": {
+            "NAME": "GLONASS Satellite ID",
+            "DTYPE": "uint:6"
+        },
+        "DF039": {
+            "NAME": "GLONASS L1 Code Indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["C/A Code",
+                    "P Code"]
+        },
+        "DF040": {
+            "NAME": "GLONASS Satellite Frequency Channel Number",
+            "DTYPE": "uint:5",
+            "VALUES": ["-07", "-06", "-05", "-04", "-03", "-02", "-01", "00",
+                    "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+        },
+        "DF041": {
+            "NAME": "GLONASS L1 Pseudorange",
+            "DTYPE": "uint:25",
+            "SCALE": 0.02,
+            "UNIT": "m"
+        },
+        "DF042": {
+            "NAME": "GLONASS L1 PhaseRange - L1 Pseudorange",
+            "DTYPE": "int:20",
+            "SCALE": 0.0005,
+            "UNIT": "m"
+        },
+        "DF043": {
+            "NAME": "GLONASS L1 Lock Time Indicator",
+            "DTYPE": "uint7"
+        },
+        "DF044": {
+            "NAME": "GLONASS Integer L1 Pseudorange Modulus Ambiguity",
+            "DTYPE": "uint:7",
+            "SCALE": 599584.916,
+            "UNIT": "m"
+        },
+        "DF045": {
+            "NAME": "GLONASS L1 CNR",
+            "DTYPE": "uint:8",
+            "SCALE": 0.25,
+            "UNIT": "dB-Hz"
+        },
+        "DF046": {
+            "NAME": "GLONASS L2 Code Indicator",
+            "DTYPE": "uint:2",
+            "VALUES": ["C/A code", 
+                    "P code",
+                    "Reserved",
+                    "Reserved"]
+        },
+        "DF047": {
+            "NAME": "GLONASS L2-L1 Pseudorange Difference",
+            "DTYPE": "uint:14",
+            "SCALE": 0.02,
+            "UNIT": "m"
+        },
+        "DF048": {
+            "NAME": "GLONASS L2 PhaseRange - L1 Pseudorange",
+            "DTYPE": "int:20",
+            "SCALE": 0.0005,
+            "UNIT": "m"
+        },
+        "DF049": {
+            "NAME": "GLONASS L2 Lock Time Indicator",
+            "DTYPE": "uint:7"
+        },
+        "DF050": {
+            "NAME": "GLONASS L2 CNR",
+            "DTYPE": "uint:8",
+            "SCALE": 0.25,
+            "UNIT": "dB-Hz"
+        },
+        "DF051": {
+            "NAME": "Modified Julian Day (MJD) Number",
+            "DTYPE": "uint:16",
+            "SCALE": 1,
+            "UNIT": "day"
+        },
+        "DF052": {
+            "NAME": "Seconds of Day",
+            "DTYPE": "uint:17",
+            "SCALE": 1,
+            "UNIT": "second"
+        },
+        "DF053": {
+            "NAME": "Number of Message ID Announcements to Follow (N_m)",
+            "DTYPE": "uint:5",
+            "SCALE": 1
+        },
+        "DF054": {
+            "NAME": "Leap Seconds, GPS-UTC",
+            "DTYPE": "uint:8",
+            "SCALE": 1,
+            "UNIT": "second"
+        },
+        "DF055": {
+            "NAME": "Message ID",
+            "DTYPE": "uint:12"
+        },
+        "DF056": {
+            "NAME": "Message Sync Flag",
+            "DTYPE": "uint:1",
+            "VALUES": ["Asynchronous - not transmitted on a regular basis",
+                    "Synchronous - scheduled for transmission at regular intervals"]
+        },
+        "DF057": {
+            "NAME": "Message Transmission Interval",
+            "DTYPE": "uint:16",
+            "SCALE": 0.1,
+            "UNIT": "second"
+        },
+        "DF058": {
+            "NAME": "Number of Auxiliary Stations Transmitted",
+            "DTYPE": "uint:5"
+        },
+        "DF059": {
+            "NAME": "Network ID",
+            "DTYPE": "uint:8"
+        },
+        "DF060": {
+            "NAME": "Master Reference Station ID",
+            "DTYPE": "uint:12"
+        },
+        "DF061": {
+            "NAME": "Auxiliary Reference Station ID",
+            "DTYPE": "uint:12"
+        },
+        "DF062": {
+            "NAME": "Aux-Master Delta Latitude",
+            "DTYPE": "int:20",
+            "SCALE": 25e-6,
+            "UNIT": "deg"
+        },
+        "DF063": {
+            "NAME": "Aux-Master Delta Longitude",
+            "DTYPE": "int:21",
+            "SCALE": 25e-6,
+            "UNIT": "deg"
+        },
+        "DF064": {
+            "NAME": "Aux-Master Delta Height",
+            "DTYPE": "int:23",
+            "SCALE": 1,
+            "UNIT": "mm"
+        }, 
+        "DF065": {
+            "NAME": "GPS Epoch Time (GPS TOW)",
+            "DTYPE": "uint:23",
+            "SCALE": 0.1,
+            "UNIT": "sec"
+        },
+        "DF066": {
+            "NAME": "GPS Multiple Message Indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["Messages with the same Message Number and Epoch Time will be transmitted in sequence.",
+                    "Last message of a sequence."]
+        },
+        "DF067": {
+            "NAME": "Number of GPS Satellite",
+            "DTYPE": "uint:4"
+        },
+        "DF068": {
+            "NAME": "GPS Satellite ID",
+            "DTYPE": "uint:6"
+        },
+        "DF069": {
+            "NAME": "GPS Ionospheric Carrier Phase Correction Difference",
+            "DTYPE": "int:17",
+            "SCALE": 0.5,
+            "UNIT": "mm"
+        },
+        "DF070": {
+            "NAME": "GPS Geometric Carrier Phase Correction Difference",
+            "DTYPE": "int:17",
+            "SCALE": 0.5,
+            "UNIT": "mm"
+        },
+        "DF071": {
+            "NAME": "GPS IODE",
+            "DTYPE": "bin:8"
+        },
+        "DF072": {
+            "NAME": "Subnetwork ID",
+            "DTYPE": "uint:4"
+        },
+        "DF073": {
+            "NAME": "RESERVED for Provider ID",
+            "DTYPE": "uint:8"
+        },
+        "DF074": {
+            "NAME": "GPS Ambiguity Status Flag",
+            "DTYPE": "uint:2",
+            "VALUES": ["Reserved for future use (artificial observations)",
+                    "Correct Integer Ambiguity Level for L1 and L2",
+                    "Correct Integer Ambiguity Level for L1-L2 widelane",
+                    "Uncertain Integer Ambiguity Level. Only a likely guess is used."]
+        },
+        "DF075": {
+            "NAME": "GPS No Sync Count",
+            "DTYPE": "uint:3"
+        },
+        "DF076": {
+            "NAME": "GPS Week number",
+            "DTYPE": "uint:10",
+            "SCALE": 1,
+            "UNIT": "week"
+        },
+        "DF077": {
+            "NAME": "GPS SV Acc. (URA)",
+            "DTYPE": "bin:4"
+        },
+        "DF078": {
+            "NAME": "GPS Code On L2",
+            "DTYPE": "uint:2",
+            "VALUES": ["Reserved", 
+                    "P code ON",
+                    "C/A code ON",
+                    "L2C ON"]
+        },
+        "DF079": {
+            "NAME": "GPS IDOT",
+            "DTYPE": "int:14",
+            "SCALE": 1.136868377216160297393798828125e-13,
+            "UNIT": "semi-circle/sec"
+        },
+        "DF080": {
+            "NAME": "GPS IODE",
+            "DTYPE": "uint:8"
+        },
+        "DF081": {
+            "NAME": "GPS t_oc",
+            "DTYPE": "uint:16",
+            "SCALE": 16,
+            "UNIT": "s"
+        },
+        "DF082": {
+            "NAME": "GPS a_f2",
+            "DTYPE": "int:8",
+            "SCALE": 2.7755575615628913510590791702271e-17,
+            "UNIT": "sec/sec^2"
+        },
+        "DF083": {
+            "NAME": "GPS a_f1",
+            "DTYPE": "int:16",
+            "SCALE": 1.136868377216160297393798828125e-13,
+            "UNIT": "sec/sec"
+        },
+        "DF084": {
+            "NAME": "GPS a_f0",
+            "DTYPE": "int:22",
+            "SCALE": 0.0000000004656612873077392578125,
+            "UNIT": "sec"
+        },
+        "DF085": {
+            "NAME": "GPS IODC",
+            "DTYPE": "uint:10"
+        },
+        "DF086": {
+            "NAME": "GPS C_rc",
+            "DTYPE": "int:16",
+            "SCALE": 0.03125,
+            "UNIT": "m"
+        },
+        "DF087": {
+            "NAME": "GPS Delta n",
+            "DTYPE": "int:16",
+            "SCALE": 1.136868377216160297393798828125e-13,
+            "UNIT": "semi-circles/sec"
+        },
+        "DF088": {
+            "NAME": "GPS M_0",
+            "DTYPE": "int:32",
+            "SCALE": 0.0000000004656612873077392578125,
+            "UNIT": "semi-circles"
+        },
+        "DF089": {
+            "NAME": "GPS C_uc",
+            "DTYPE": "int:16",
+            "SCALE": 0.00000000186264514923095703125,
+            "UNIT": "rad"
+        },
+        "DF090": {
+            "NAME": "GPS Eccentricity (e)",
+            "DTYPE": "uint:32",
+            "SCALE": 1.16415321826934814453125e-10
+        },
+        "DF091": {
+            "NAME": "GPS C_us",
+            "DTYPE": "int:16",
+            "SCALE": 0.00000000186264514923095703125,
+            "UNIT": "rad"
+        },
+        "DF092": {
+            "NAME": "GPS (A)^(1/2)",
+            "DTYPE": "uint:32",
+            "SCALE": 0.0000019073486328125,
+            "UNIT": "m^(1/2)"
+        },
+        "DF093": {
+            "NAME": "GPS t_oe",
+            "DTYPE": "uint:16",
+            "SCALE": 16,
+            "UNIT": "sec"
+        },
+        "DF094": {
+            "NAME": "GPS C_ic",
+            "DTYPE": "int:16",
+            "SCALE": 0.00000000186264514923095703125,
+            "UNIT": "rad"
+        },
+        "DF095": {
+            "NAME": "GPS OMEGA_0",
+            "DTYPE": "int:32",
+            "SCALE": 0.0000000004656612873077392578125,
+            "UNIT": "semi-circles"
+        },
+        "DF096": {
+            "NAME": "GPS C_is",
+            "DTYPE": "int:16",
+            "SCALE": 0.00000000186264514923095703125,
+            "UNIT": "rad"
+        },
+        "DF097": {
+            "NAME": "GPS i_0",
+            "DTYPE": "int:32",
+            "SCALE": 0.0000000004656612873077392578125,
+            "UNIT": "semi-circles"
+        },
+        "DF098": {
+            "NAME": "GPS C_rc",
+            "DTYPE": "int:16",
+            "SCALE": 0.015625,
+            "UNIT": "m"
+        },
+        "DF099": {
+            "NAME": "GPS omega (Argument of perigee)",
+            "DTYPE": "int:32",
+            "SCALE": 0.0000000004656612873077392578125,
+            "UNIT": "semi-circles"
+        },
+        "DF100": {
+            "NAME": "GPS OMEGADOT (Rate of right ascension)",
+            "DTYPE": "int:24",
+            "SCALE": 1.136868377216160297393798828125e-13,
+            "UNIT": "semi-circles/sec"
+        },
+        "DF101": {
+            "NAME": "GPS t_GD",
+            "DTYPE": "int:8",
+            "SCALE": 0.0000000004656612873077392578125,
+            "UNIT": "sec"
+        },
+        "DF102": {
+            "NAME": "GPS SV Health",
+            "DTYPE": "uint:6",
+            "VALUES": ["all NAV data are OK",
+                    "some or all NAV data are bad"]
+        },
+        "DF103": {
+            "NAME": "GPS L2 P data flag",
+            "DTYPE": "uint:1",
+            "VALUES": ["L2 P-Code NAV data ON",
+                    "L2 P-Code NAV data OFF"]
+        },
+        "DF104": {
+            "NAME": "GLONASS almanac health",
+            "DTYPE": "bin:1"
+        },
+        "DF105": {
+            "NAME": "GLONASS almanac health availability indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["GLONASS almanac health is not available",
+                    "GLONASS almanac health is available"]
+        },
+        "DF106": {
+            "NAME": "GLONASS P1",
+            "DTYPE": "bin:1"
+        },
+        "DF107": {
+            "NAME": "GLONASS t_k",
+            "DTYPE": "bin:12"
+        },
+        "DF108": {
+            "NAME": "GLONASS MSB of B_n word",
+            "DTYPE": "bin:1"
+        },
+        "DF109": {
+            "NAME": "GLONASS P2",
+            "DTYPE": "bin:1"
+        },
+        "DF110": {
+            "NAME": "GLONASS t_b",
+            "DTYPE": "uint:7"
+        },
+        "DF111": {
+            "NAME": "GLONASS x_n(t_b) first derivative",
+            "DTYPE": "intS:24",
+            "SCALE": 0.00000095367431640625,
+            "UNIT": "km/s"
+        },
+        "DF112": {
+            "NAME": "GLONASS x_n(t_b)",
+            "DTYPE": "intS:27",
+            "SCALE": 0.00048828125,
+            "UNIT": "km"
+        },
+        "DF113": {
+            "NAME": "GLONASS xn(t_b), second derivative",
+            "DTYPE": "intS:5",
+            "SCALE": 0.000000000931322574615478515625,
+            "UNIT": "km/s^2"
+        },
+        "DF114": {
+            "NAME": "GLONASS y_n(t_b), first derivative",
+            "DTYPE": "intS:24",
+            "SCALE": 0.00000095367431640625,
+            "UNIT": "km/s"
+        },
+        "DF115": {
+            "NAME": "GLONASS y_n(t_b)",
+            "DTYPE": "intS:27",
+            "SCALE": 0.00048828125,
+            "UNIT": "km"
+        },
+        "DF116": {
+            "NAME": "GLONASS y_n(t_b), second derivative",
+            "DTYPE": "intS:5",
+            "SCALE": 0.000000000931322574615478515625,
+            "UNIT": "km/s^2"
+        },
+        "DF117": {
+            "NAME": "GLONASS z_n(t_b), first derivative",
+            "DTYPE": "intS:24",
+            "SCALE": 0.00000095367431640625,
+            "UNIT": "km/s"
+        },
+        "DF118": {
+            "NAME": "GLONASS z_n(t_b)",
+            "DTYPE": "intS:27",
+            "SCALE": 0.00048828125,
+            "UNIT": "km"
+        },
+        "DF119": {
+            "NAME": "GLONASS z_n(t_b), second derivative",
+            "DTYPE": "intS:5",
+            "SCALE": 0.000000000931322574615478515625,
+            "UNIT": "km/s^2"
+        },
+        "DF120": {
+            "NAME": "GLONASS P3",
+            "DTYPE": "bin:1"
+        },
+        "DF121": {
+            "NAME": "GLONASS gamma_n(t_b)",
+            "DTYPE": "intS:11",
+            "SCALE": 9.094947017729282379150390625e-13
+        },
+        "DF122": {
+            "NAME": "GLONASS-M P",
+            "DTYPE": "bin:2"
+        },
+        "DF123": {
+            "NAME": "GLONASS-M l_n (third string)",
+            "DTYPE": "bin:1"
+        },
+        "DF124": {
+            "NAME": "GLONASS tau_n(t_b)",
+            "DTYPE": "intS:22",
+            "SCALE": 0.000000000931322574615478515625,
+            "UNIT": "second"
+        },
+        "DF125": {
+            "NAME": "GLONASS-M Delta tau_n",
+            "DTYPE": "intS:5",
+            "SCALE": 0.000000000931322574615478515625,
+            "UNIT": "second"
+        },
+        "DF126": {
+            "NAME": "GLONASS E_n",
+            "DTYPE": "uint:5",
+            "SCALE": 1,
+            "UNIT": "day"
+        },
+        "DF127": {
+            "NAME": "GLONASS-M P4",
+            "DTYPE": "bin:1"
+        },
+        "DF128": {
+            "NAME": "GLONASS-M F_T",
+            "DTYPE": "uint:4"
+        },
+        "DF129": {
+            "NAME": "GLONASS-M N_T",
+            "DTYPE": "uint:11",
+            "SCALE": 1,
+            "UNIT": "day"
+        },
+        "DF130": {
+            "NAME": "GLONASS-M M",
+            "DTYPE": "uint:2",
+            "VALUES": ["Not GLONASS-M satellite type; All GLONASS-M data fields are invalid, thus they may contain arbitrary values.",
+                    "GLONASS-M satellite type; All GLONASS-M data fields are valid."]
+        },
+        "DF131": {
+            "NAME": "GLONASS The availability of additional data",
+            "DTYPE": "uint:1",
+            "VALUES": ["The additional parameters are in the message.",
+                    "DF132-DF136 may contain arbitrary values."]
+        },
+        "DF132": {
+            "NAME": "GLONASS N^A",
+            "DTYPE": "uint:11",
+            "SCALE": 1,
+            "UNIT": "day"
+        },
+        "DF133": {
+            "NAME": "GLONASS tau_c",
+            "DTYPE": "intS:32",
+            "SCALE": 0.0000000004656612873077392578125,
+            "UNIT": "second"
+        },
+        "DF134": {
+            "NAME": "GLONASS-M N_4",
+            "DTYPE": "uint:5",
+            "SCALE": 4,
+            "UNIT": "years"
+        },
+        "DF135": {
+            "NAME": "GLONASS-M tau_GPS",
+            "DTYPE": "intS:22",
+            "SCALE": 0.000000000931322574615478515625,
+            "UNIT": "second"
+        },
+        "DF136": {
+            "NAME": "GLONASS-M l_n (fifth string)",
+            "DTYPE": "bin:1"
+        },
+        "DF137": {
+            "NAME": "GPS Fit Interval",
+            "DTYPE": "uint:1",
+            "VALUES": ["curve-fit interval is 4 hours",
+                    "curve-fit is greater than 4 hours"]
+        },
+        
+        "DF138": {
+            "NAME": "Number of Characters to Follow",
+            "DTYPE": "uint:7"
+        },
+        "DF139": {
+            "NAME": "Number of UTF-8 Code Units",
+            "DTYPE": "uint:8"
+        },
+        "DF140": {
+            "NAME": "UTF-8 Character Code Units",
+            "DTYPE": "utf8"
+        },
+        "DF141": {
+            "NAME": "Reference-Station Indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["Real, Physical Reference Station",
+                    "Non-Physical or Computed Reference Station"]
+        },
+        "DF142": {
+            "NAME": "Single Receiver Oscilliator Indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["All raw data observations in messages 1001-1004 and 1009-1012 may be measured\r\nat different instants. This indicator should be set to \"0\" unless all the conditions\r\nfor \"1\" are clearly met.",
+                    "All raw data observations in messages 1001-1004 and 1009-1012 are measured at\r\nthe same instant."]
+        },
+        "DF143": {
+            "NAME": "Source-Name Counter",
+            "DTYPE": "uint:5"
+        },
+        "DF144": {
+            "NAME": "Source-Name",
+            "DTYPE": "uint:8"
+        },
+        "DF145": {
+            "NAME": "Target-Name Counter",
+            "DTYPE": "uint:5"
+        },
+        "DF146": {
+            "NAME": "Target-Name",
+            "DTYPE": "uint:8"
+        },
+        "DF147": {
+            "NAME": "System Identification Number",
+            "DTYPE": "uint:8"
+        },
+        "DF148": {
+            "NAME": "Utilized Transformation Message Indicator",
+            "DTYPE": "uint:10",
+            "VALUES": ["Message not utilized",
+                    "Message utilized",
+                    "1023",
+                    "1024",
+                    "1025",
+                    "1026",
+                    "1027",
+                    "0 (Reserved)",
+                    "0 (Reserved)",
+                    "0 (Reserved)",
+                    "0 (Reserved)",
+                    "0 (Reserved)"]
+        },
+        "DF149": {
+            "NAME": "Plate Number",
+            "DTYPE": "uint:5",
+            "VALUES": ["unknown plate",
+                    "AFRC - Africa",
+                    "ANTA - Antiartica",
+                    "ARAB - Arabia",
+                    "AUST - Austrailia",
+                    "CARB - Caribbea",
+                    "COCO - Cocos",
+                    "EURA - Eurasia",
+                    "INDI - India",
+                    "NOAM - N. America",
+                    "NAZC - Nazca", 
+                    "PCFC - Pacific",
+                    "SOAM - S. America",
+                    "JUFU - Juan de Fuca",
+                    "PHIL - Philippine",
+                    "RIVR - Rivera",
+                    "SCOT - Scotia",
+                    "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved",
+                    "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved"]
+        },
+        "DF150": {
+            "NAME": "Computation Indicator",
+            "DTYPE": "uint:4",
+            "VALUES": ["Standard seven parameter, approxsimation",
+                    "Standard seven parameter, strict formula",
+                    "Molodenski, abridged",
+                    "Molodenski-Badekas",
+                    "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved",
+                    "Reserved", "Reserved", "Reserved"]
+        },
+        "DF151": {
+            "NAME": "Height Indicator",
+            "DTYPE": "uint:2",
+            "VALUES": ["Geometric heights result",
+                    "Physical heights result. Physical heights are derived via Helmert/Molodenski transformation.",
+                    "Physical heights result. Height definition is in Source System for instance if a geoid model is involved.",
+                    "Reserved"]
+        },
+        "DF152": {
+            "NAME": "PHI_V",
+            "DTYPE": "int:19",
+            "SCALE": 2,
+            "UNIT": "second"
+        },
+        "DF153": {
+            "NAME": "LAMBDA_V",
+            "DTYPE": "int:20",
+            "SCALE": 2,
+            "UNIT": "second"
+        },
+        "DF154": {
+            "NAME": "Delta PHI_V",
+            "DTYPE": "uint:14",
+            "SCALE": 2,
+            "UNIT": "second"
+        },
+        "DF155": {
+            "NAME": "Delta LAMBDA_V",
+            "DTYPE": "uint:14",
+            "SCALE": 2,
+            "UNIT": "second"
+        },
+        "DF156": {
+            "NAME": "dX",
+            "DTYPE": "int:23",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF157": {
+            "NAME": "dY",
+            "DTYPE": "int:23",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF158": {
+            "NAME": "dZ",
+            "DTYPE": "int:23",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF159": {
+            "NAME": "R_1",
+            "DTYPE": "int:32",
+            "SCALE": 0.00002,
+            "UNIT": "second"
+        },
+        "DF160": {
+            "NAME": "R_2",
+            "DTYPE": "int:32",
+            "SCALE": 0.00002,
+            "UNIT": "second"
+        },
+        "DF161": {
+            "NAME": "R_3",
+            "DTYPE": "int:32",
+            "SCALE": 0.00002,
+            "UNIT": "second"
+        },
+        "DF162": {
+            "NAME": "dS",
+            "DTYPE": "int:25",
+            "SCALE": 0.00001,
+            "UNIT": "PPM"
+        },
+        "DF163": {
+            "NAME": "X_P",
+            "DTYPE": "int:35",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF164": {
+            "NAME": "Y_P",
+            "DTYPE": "int:35",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF165": {
+            "NAME": "Z_P",
+            "DTYPE": "int:35",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF166": {
+            "NAME": "add a_S",
+            "DTYPE": "uint:24",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF167": {
+            "NAME": "add b_S",
+            "DTYPE": "uint:25",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF168": {
+            "NAME": "add a_T",
+            "DTYPE": "uint:24",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF169": {
+            "NAME": "add b_T",
+            "DTYPE": "uint:25",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF170": {
+            "NAME": "Projection Type",
+            "DTYPE": "uint:6",
+            "VALUES": ["TM - Transverse Mercator",
+                    "TMS - Tranverse Mercator (South orientated)",
+                    "LCC1SP - Lambert Conic Conformal (1SP)",
+                    "LCC2SP - Lambert Conic Conformal (2SP)",
+                    "LCCW - Lambert Conic Conformal (West Orientated)",
+                    "CS - Cassini-Soldner",
+                    "OM - Oblique Mercator",
+                    "OS - Oblique Stereographic",
+                    "MC - Mercator",
+                    "PS - Polar Stereographic",
+                    "DS - Double Stereographic",
+                    "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved",
+                    "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved",
+                    "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved",
+                    "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved",
+                    "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved",
+                    "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved"]
+        },
+        "DF171": {
+            "NAME": "LaNO",
+            "DTYPE": "int:34",
+            "SCALE": 0.000000011,
+            "UNIT": "deg"
+        },
+        "DF172": {
+            "NAME": "LoNO",
+            "DTYPE": "int:35",
+            "SCALE": 0.000000011,
+            "UNIT": "deg"
+        },
+        "DF173": {
+            "NAME": "add SNO",
+            "DTYPE": "uint:30",
+            "SCALE": 0.00001,
+            "UNIT": "PPM"
+        },
+        "DF174": {
+            "NAME": "FE",
+            "DTYPE": "uint:36",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF175": {
+            "NAME": "FN",
+            "DTYPE": "int:35",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF176": {
+            "NAME": "LaFO",
+            "DTYPE": "int:34",
+            "SCALE": 0.000000011,
+            "UNIT": "deg"
+        },
+        "DF177": {
+            "NAME": "LoFO",
+            "DTYPE": "int:35",
+            "SCALE": 0.000000011,
+            "UNIT": "deg"
+        },
+        "DF178": {
+            "NAME": "LaSP1",
+            "DTYPE": "int:34",
+            "SCALE": 0.000000011,
+            "UNIT": "deg"
+        },
+        "DF179": {
+            "NAME": ":aSP2",
+            "DTYPE": "int:34",
+            "SCALE": 0.000000011,
+            "UNIT": "deg"
+        },
+        "DF180": {
+            "NAME": "EFO",
+            "DTYPE": "uint:36",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF181": {
+            "NAME": "NFO",
+            "DTYPE": "int:35",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF182": {
+            "NAME": "Rectification Flag",
+            "DTYPE": "uint:1",
+            "VALUES": ["Not rectified",
+                    "Rectified Oblique Mercator projection"]
+        },
+        "DF183": {
+            "NAME": "LaPC",
+            "DTYPE": "int:34",
+            "SCALE": 0.000000011,
+            "UNIT": "deg"
+        },
+        "DF184": {
+            "NAME": "LoPc",
+            "DTYPE": "int:35",
+            "SCALE": 0.000000011,
+            "UNIT": "deg"
+        },
+        "DF185": {
+            "NAME": "AzIL",
+            "DTYPE": "uint:35",
+            "SCALE": 0.000000011,
+            "UNIT": "deg"
+        },
+        "DF186": {
+            "NAME": "Diff ARSG",
+            "DTYPE": "int:26",
+            "SCALE": 0.000000011,
+            "UNIT": "deg"
+        },
+        "DF187": {
+            "NAME": "Add SIL",
+            "DTYPE": "uint:30",
+            "SCALE": 0.00001,
+            "UNIT": "PPM"
+        },
+        "DF188": {
+            "NAME": "EPC",
+            "DTYPE": "uint:36",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF189": {
+            "NAME": "NPC",
+            "DTYPE": "int:35",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF190": {
+            "NAME": "Horizontal Shift Indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["no horizontal shift",
+                    "apply horizontal shift"]
+        },
+        "DF191": {
+            "NAME": "Vertical Shift Indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["no vertical shift",
+                    "apply vertical shift"]
+            
+        },
+        "DF192": {
+            "NAME": "PHI_0",
+            "DTYPE": "int:21",
+            "SCALE": 0.5,
+            "UNIT": "second"
+        },
+        "DF193": {
+            "NAME": "LAMBDA_0",
+            "DTYPE": "int:22",
+            "SCALE": 0.5,
+            "UNIT": "second"
+        },
+        "DF194": {
+            "NAME": "Delta phi",
+            "DTYPE": "uint:12",
+            "SCALE": 0.5,
+            "UNIT": "second"
+        },
+        "DF195": {
+            "NAME": "Delta lambda",
+            "DTYPE": "uint:12",
+            "SCALE": 0.5,
+            "UNIT": "second"
+        },
+        "DF196": {
+            "NAME": "Mean Delta phi",
+            "DTYPE": "int:8",
+            "SCALE": 0.001,
+            "UNIT": "second"
+        },
+        "DF197": {
+            "NAME": "Mean Delta lambda",
+            "DTYPE": "int:8",
+            "SCALE": 0.001,
+            "UNIT": "second"
+        },
+        "DF198": {
+            "NAME": "Mean Delta H",
+            "DTYPE": "int:15",
+            "SCALE": 0.01,
+            "UNIT": "m"
+        },
+        "DF199": {
+            "NAME": "delta phi_i",
+            "DTYPE": "int:9",
+            "SCALE": 0.00003,
+            "UNIT": "second"
+        },
+        "DF200": {
+            "NAME": "delta lambda_i",
+            "DTYPE": "int:9",
+            "SCALE": 0.00003,
+            "UNIT": "second"
+        },
+        "DF201": {
+            "NAME": "delta h_i",
+            "DTYPE": "int:9",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF202": {
+            "NAME": "N_0",
+            "DTYPE": "int:25",
+            "SCALE": 10,
+            "UNIT": "m"
+        },
+        "DF203": {
+            "NAME": "E_0",
+            "DTYPE": "uint:26",
+            "SCALE": 10,
+            "UNIT": "m"
+        },
+        "DF204": {
+            "NAME": "Delta N",
+            "DTYPE": "uint:12",
+            "SCALE": 10,
+            "UNIT": "m"
+        },
+        "DF205": {
+            "NAME": "Delta E",
+            "DTYPE": "uint:12",
+            "SCALE": 10,
+            "UNIT": "m"
+        },
+        "DF206": {
+            "NAME": "Mean Delta N",
+            "DTYPE": "int:10",
+            "SCALE": 0.01,
+            "UNIT": "m"
+        },
+        "DF207": {
+            "NAME": "Mean Delta E",
+            "DTYPE": "int:10",
+            "SCALE": 0.01,
+            "UNIT": "m"
+        },
+        "DF208": {
+            "NAME": "Mean Delta h",
+            "DTYPE": "int:15",
+            "SCALE": 0.01,
+            "UNIT": "m"
+        },
+        "DF209": {
+            "NAME": "delta N_i",
+            "DTYPE": "int:9",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF210": {
+            "NAME": "delta E_i",
+            "DTYPE": "int:9",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF211": {
+            "NAME": "delta h_i",
+            "DTYPE": "int:9",
+            "SCALE": 0.001,
+            "UNIT": "m"
+        },
+        "DF212": {
+            "NAME": "Horizontal Interpolation Method Indicator",
+            "DTYPE": "uint:2",
+            "VALUES": ["Bi-Linear",
+                    "Bi-Quadratic",
+                    "Bi-Spline",
+                    "Reserved"]
+        },
+        "DF213": {
+            "NAME": "Vertical Interpolation Method Indicator",
+            "DTYPE": "uint:2",
+            "VALUES": ["Bi-Linear",
+                    "Bi-Quadratic",
+                    "Bi-Spline",
+                    "Reserved"]
+        },
+        "DF214": {
+            "NAME": "Horizontal Helmert/Molodenski Quality Indicator",
+            "DTYPE": "uint:3",
+            "VALUES": ["Unknown quality",
+                    "Quality better than 21 Millimeters",
+                    "Quality 21 to 50 Millimeters",
+                    "Quality 51 to 200 Millimeters",
+                    "Quality 201 to 500 Millimeters",
+                    "Quality 501 to 2000 Millimeters",
+                    "Quality 2001 to 5000 Millimeters",
+                    "Quality worse than 5001 Millimeters"]
+        },
+        "DF215": {
+            "NAME": "Vertical Helmert/Molodenski Quality Indicator",
+            "DTYPE": "uint:3",
+            "VALUES": ["Unknown quality",
+                    "Quality better than 21 Millimeters",
+                    "Quality 21 to 50 Millimeters",
+                    "Quality 51 to 200 Millimeters",
+                    "Quality 201 to 500 Millimeters",
+                    "Quality 501 to 2000 Millimeters",
+                    "Quality 2001 to 5000 Millimeters",
+                    "Quality worse than 5001 Millimeters"]
+        },
+        "DF216": {
+            "NAME": "Horizontal Grid Quality Indicator",
+            "DTYPE": "uint:3",
+            "VALUES": ["Unknown quality",
+                    "Quality 0 to 10 Millimeters",
+                    "Quality 11 to 20 Millimeters",
+                    "Quality 21 to 50 Millimeters",
+                    "Quality 51 to 100 Millimeters",
+                    "Quality 101 to 200 Millimeters",
+                    "Quality 201 to 500 Millimeters",
+                    "Quality worse than 501 Millimeters"]
+        },
+        "DF217": {
+            "NAME": "Vertical Grid Quality Indiator",
+            "DTYPE": "uint:3",
+            "VALUES": ["Unknown quality",
+                    "Quality 0 to 10 Millimeters",
+                    "Quality 11 to 20 Millimeters",
+                    "Quality 21 to 50 Millimeters",
+                    "Quality 51 to 100 Millimeters",
+                    "Quality 101 to 200 Millimeters",
+                    "Quality 201 to 500 Millimeters",
+                    "Quality worse than 501 Millimeters"]
+        },
+        "DF218": {
+            "NAME": "S_oc",
+            "DTYPE": "uint:8",
+            "SCALE": 0.5,
+            "UNIT": "m"
+        },
+        "DF219": {
+            "NAME": "S_od",
+            "DTYPE": "uint:9",
+            "SCALE": 0.01,
+            "UNIT": "ppm"
+        },
+        "DF220": {
+            "NAME": "S_oh",
+            "DTYPE": "uint:6",
+            "SCALE": 0.1,
+            "UNIT": "ppm"
+        },
+        "DF221": {
+            "NAME": "S_lc",
+            "DTYPE": "uint:10",
+            "SCALE": 0.5,
+            "UNIT": "mm"
+        },
+        "DF222": {
+            "NAME": "S_ld",
+            "DTYPE": "uint:10",
+            "SCALE": 0.01,
+            "UNIT": "ppm"
+        },
+        "DF223": {
+            "NAME": "N-Refs",
+            "DTYPE": "uint:7"
+        },
+        "DF224": {
+            "NAME": "GPS Residual Epoch Time (TOW)",
+            "DTYPE": "uint:20",
+            "SCALE": 1,
+            "UNIT": "s"
+        },
+        "DF225": {
+            "NAME": "GLONASS Residual Epoch Time (t_k)",
+            "DTYPE": "uint:17",
+            "SCALE": 1,
+            "UNIT": "s"
+        },
+        "DF226": {
+            "NAME": "Physical Reference Station ID",
+            "DTYPE": "uint:12"
+        },
+        "DF227": {
+            "NAME": "Receiver Type Descriptor Counter",
+            "DTYPE": "uint:8"
+        },
+        "DF228": {
+            "NAME": "Receiver Type Descriptor",
+            "DTYPE": "uint:8"
+        },
+        "DF229": {
+            "NAME": "Receiver Firmware Version Counter",
+            "DTYPE": "uint:8"
+        },
+        "DF230": {
+            "NAME": "Receiver Firmware Version",
+            "DTYPE": "uint:8"
+        },
+        "DF231": {
+            "NAME": "Receiver Serial Number Counter",
+            "DTYPE": "uint:8" 
+        },
+        "DF232": {
+            "NAME": "Receiver Serial Number",
+            "DTYPE": "uint:8"
+        },
+        "DF233": {
+            "NAME": "GLONASS NW Epoch Time",
+            "DTYPE": "uint:20",
+            "SCALE": 0.1,
+            "UNIT": "s"
+        },
+        "DF234": {
+            "NAME": "Number of GLONASS Data Entried",
+            "DTYPE": "uint:4"
+        },
+        "DF235": {
+            "NAME": "GLONASS Ambiguity Status Flag",
+            "DTYPE": "uint:2",
+            "VALUES": ["Reserved for future use (artificial observations)",
+                    "Correct Integer Ambiguity Level for L1 and L2",
+                    "Correct Integer Ambiguity for L1-L2 widelane",
+                    "Uncertain Integer Ambiguity Level Only a likely guess is used."]
+        },
+        "DF236": {
+            "NAME": "GLONASS Non Sync Count",
+            "DTYPE": "uint:3"
+        },
+        "DF237": {
+            "NAME": "GLONASS Ionospheric Carrier Phase Correction Difference",
+            "DTYPE": "int:17",
+            "SCALE": 0.5,
+            "UNIT": "mm"
+        },
+        "DF238": {
+            "NAME": "GLONASS Geometric Carrier Phase Correction Difference",
+            "DTYPE": "int:17",
+            "SCALE": 0.5,
+            "UNIT": "mm"
+        },
+        "DF239": {
+            "NAME": "GLONASS IOD",
+            "DTYPE": "bin:8"
+        },
+        "DF240": {
+            "NAME": "GPS FKP Epoch Time",
+            "DTYPE": "uint:20",
+            "SCALE": 1,
+            "UNIT": "s"
+        },
+        "DF241": {
+            "NAME": "GLONASS FKP Epoch Time",
+            "DTYPE": "uint:17",
+            "SCALE": 1,
+            "UNIT": "s"
+        },
+        "DF242": {
+            "NAME": "N0: Geometric Gradient in North (ppm)",
+            "DTYPE": "int:12",
+            "SCALE": 0.01,
+            "UNIT": "ppm"
+        },
+        "DF243": {
+            "NAME": "E0: Geometric gradient in east (ppm)",
+            "DTYPE": "int:12",
+            "SCALE": 0.01,
+            "UNIT": "ppm"
+        },
+        "DF244": {
+            "NAME": "N1: Ionospheric gradient in north (ppm)",
+            "DTYPE": "int:14",
+            "SCALE": 0.01,
+            "UNIT": "ppm"
+        },
+        "DF245": {
+            "NAME": "E1: Ionospheric gradient in east (ppm)",
+            "DTYPE": "int:14",
+            "SCALE": 0.01,
+            "UNIT": "ppm"
+        },
+        "DF364": {
+            "NAME": "Quarter Cycle Indicator",
+            "DTYPE": "uint:2",
+            "VALUES": ["Correction status unspecified",
+                    "PhaseRange in Message Types 1001, 1002, 1003, 1004, 1009, 1010, 1011, 1012 are corrected in\r\nsuch a way that whenever PhaseRanges for different signals on the same frequency are present \r\nin these messages, they are guaranteed to be in phase and thus shall show no Quarter-Cycle \r\nbias between them. Double differences of PhaseRanges tracked with different signals shall \r\nshow no Quarter-Cycle differences.",
+                    "Phase observations are not corrected. Double differences may show Quarter-Cycle differences\r\nfor PhaseRanges based on different signals on the same frequency. Processing will require\r\nappropriate corrections.",
+                    "Reserved"]
+        },
+        "DF365": {
+            "NAME": "Delta Radial",
+            "DTYPE": "int:22",
+            "SCALE": 0.1,
+            "UNIT": "mm"
+        },
+        "DF366": {
+            "NAME": "Delta Along-Track",
+            "DTYPE": "int:20",
+            "SCALE": 0.4,
+            "UNIT": "mm"
+        },
+        "DF367": {
+            "NAME": "Delta Cross-Track",
+            "DTYPE": "int:20",
+            "SCALE": 0.4,
+            "UNIT": "mm"
+        },
+        "DF368": {
+            "NAME": "Dot Delta Radial",
+            "DTYPE": "int 21",
+            "SCALE": 0.001,
+            "UNIT": "mm/s"
+        },
+        "DF369": {
+            "NAME": "Dot Delta Along-Track",
+            "DTYPE": "int:19",
+            "SCALE": 0.004,
+            "UNIT": "mm/s"
+        },
+        "DF370": {
+            "NAME": "Dot Delta Cross-Track",
+            "DTYPE": "int:19",
+            "SCALE": 0.004,
+            "UNIT": "mm/s"
+        },
+        "DF371": {
+            "NAME": "RESERVED for Dot Dot Delta Radial",
+            "DTYPE": "int:27",
+            "SCALE": 0.00002,
+            "UNIT": "mm/s^2"
+        },
+        "DF372": {
+            "NAME": "RESERVED for Dot Dot Delta Along-Track",
+            "DTYPE": "int:25",
+            "SCALE": 0.00008,
+            "UNIT": "mm/s^2"
+        },
+        "DF373": {
+            "NAME": "RESERVED for Dot Dot Delta Cross-Track",
+            "DTYPE": "int:25",
+            "SCALE": 0.00008,
+            "UNIT": "mm/s^2"
+        },
+        "DF374": {
+            "NAME": "Satellite Reference Point",
+            "DTYPE": "uint:1",
+            "VALUES": ["Satellite Reference Point (SRP) currently L1/L2 phase center of the inonospheric free signal",
+                    "Reserved for future extension to Center Of Mass (COM) representation"]
+        },
+        "DF375": {
+            "NAME": "Satellite Reference Datum",
+            "DTYPE": "uint:1",
+            "VALUES": ["ITRF",
+                    "Regional"]
+        },
+        "DF376": {
+            "NAME": "Delta Clock C0",
+            "DTYPE": "int:22",
+            "SCALE": 0.1,
+            "UNIT": "mm"
+        },
+        "DF377": {
+            "NAME": "Delta Clock C1",
+            "DTYPE": "int:21",
+            "SCALE": 0.001,
+            "UNIT": "mm/s"
+        },
+        "DF378": {
+            "NAME": "Delta Clock C2",
+            "DTYPE": "int:27",
+            "SCALE": 0.00002,
+            "UNIT": "mm/s^2"
+        },
+        "DF379": {
+            "NAME": "No. of Code Bises Processed",
+            "DTYPE": "uint:5"
+        },
+        "DF380": {
+            "NAME": "GPS Signal and Tracking Mode Indentifier",
+            "DTYPE": "uint:5",
+            "VALUES": ["L1 C/A",
+                    "L1 P", 
+                    "L1 Z-tracking and similar (AS on)",
+                    "Reserved",
+                    "Reserved",
+                    "L2 C/A",
+                    "L2 L1(C/A)+(P2-P1) (semi-codeless)",
+                    "L2 L2C (M)",
+                    "L2 L2C (L)",
+                    "L2 L2C (M+L)",
+                    "L2 P",
+                    "L2 Z-tracking and similar (AS on)",
+                    "Reserved",
+                    "Reserved",
+                    "L5 I",
+                    "L5 Q",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved"]
+        },
+        "DF381": {
+            "NAME": "GLONASS Signal and Tracking Mode Identifier",
+            "DTYPE": "uint:5",
+            "VALUES": ["G1 C/A",
+                    "G1 P",
+                    "G2 C/A (GLONASS M)",
+                    "G2 P",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved"]
+        },
+        "DF382": {
+            "NAME": "RESERVED for Galileo Signal and Tracking Mode Identifier",
+            "DTYPE": "uint:5",
+            "VALUES": ["E1 A PRS",
+                    "E1 B I/NAV OS/CS/SoL",
+                    "E1 C no data",
+                    "Reserved",
+                    "Reserved",
+                    "E5a I F/NAV OS",
+                    "E5a Q no data",
+                    "Reserved",
+                    "E5b I I/NAV OS/CS/SoL",
+                    "E5b Q no data",
+                    "Reserved",
+                    "E5 I",
+                    "E5 Q",
+                    "Reserved",
+                    "E6 A PRS",
+                    "E6 B C/NAV CS",
+                    "E6 C no data",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved",
+                    "Reserved"]
+        },
+        "DF383": {
+            "NAME": "Code Bias",
+            "DTYPE": "int:14",
+            "SCALE": 0.01,
+            "UNIT": "m"
+        },
+        "DF384": {
+            "NAME": "GLONASS Satellite ID",
+            "DTYPE": "uint:5"
+        },
+        "DF385": {
+            "NAME": "GPS Epoch Time 1s",
+            "DTYPE": "uint:20",
+            "SCALE": 1,
+            "UNIT": "s"
+        },
+        "DF386": {
+            "NAME": "GLONASS Epoch Time 1S",
+            "DTYPE": "uint:17",
+            "SCALE": 1,
+            "UNIT": "s"
+        },
+        "DF387": {
+            "NAME": "No. of Satellites",
+            "DTYPE": "uint:6"
+        },
+        "DF388": {
+            "NAME": "Multiple Message Indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["last message of a sequence",
+                    "multiple message transmitted"]
+        },
+        "DF389": {
+            "NAME": "SSR URA",
+            "DTYPE": "bin:6"
+        },
+        "DF390": {
+            "NAME": "High Rate Clock Correction",
+            "DTYPE": "int:22",
+            "SCALE": 0.1,
+            "UNIT": "mm"
+        },
+        "DF391": {
+            "NAME": "SSR Update Interval",
+            "DTYPE": "uint:4",
+            "VALUES": ["1 s",
+                    "2 s",
+                    "5 s",
+                    "10 s",
+                    "15 s",
+                    "30 s",
+                    "60 s",
+                    "120 s",
+                    "240 s",
+                    "300 s",
+                    "600 s",
+                    "900 s",
+                    "1800 s",
+                    "3600 s",
+                    "7200 s", 
+                    "10800 s"]
+        },
+        "DF392": {
+            "NAME": "GLONASS Issue of Data (IOD)",
+            "DTYPE": "bin:8"
+        },
+        "DF393": {
+            "NAME": "MSM Multiple Message Bit",
+            "DTYPE": "bin:1"
+        },
+        "DF394": {
+            "NAME": "GNSS Satellite mask",
+            "DTYPE": "bin:64"
+        },
+        "DF395": {
+            "NAME": "GNSS Signal mask",
+            "DTYPE": "bin:32"
+        },
+        "DF396": {
+            "NAME": "GNSS Cell mask",
+            "DTYPE": "bin:1"
+        },
+        "DF397": {
+            "NAME": "The number of integer milliseconds in GNSS Satellite rough range",
+            "DTYPE": "uint:8",
+            "SCALE": 1,
+            "UNIT": "ms"
+        },
+        "DF398": {
+            "NAME": "GNSS Satellite rough range modulo 1 miliisecond",
+            "DTYPE": "uint:10",
+            "SCALE": 0.0009765625,
+            "UNIT": "ms"
+        },
+        "DF399": {
+            "NAME": "GNSS Satellite rough Phase Range Rate",
+            "DTYPE": "int:14",
+            "SCALE": 1,
+            "UNIT": "m/s"
+        },
+        "DF400": {
+            "NAME": "GNSS signal fine Pseudorange",
+            "DTYPE": "int:15",
+            "SCALE": 0.000000059604644775390625,
+            "UNIT": "ms"
+        },
+        "DF401": {
+            "NAME": "GNSS signal fine PhaseRange date",
+            "DTYPE": "int:22",
+            "SCALE": 0.00000000186264514923095703125,
+            "UNIT": "ms"
+        },
+        "DF402": {
+            "NAME": "GNSS PhaseRange Lock Time Indicator",
+            "DTYPE": "uint:4"
+        },
+        "DF403": {
+            "NAME": "GNSS signal CNR",
+            "DTYPE": "uint:6",
+            "SCALE": 1,
+            "UNIT": "dB-Hz"
+        },
+        "DF404": {
+            "NAME": "GNSS signal fine Phase Range Rate",
+            "DTYPE": "int:15",
+            "SCALE": 0.0001,
+            "UNIT": "m/s"
+        },
+        "DF405": {
+            "NAME": "GNSS signal fine Pseudorange with extended resolution",
+            "DTYPE": "int:20",
+            "SCALE": 0.00000000186264514923095703125,
+            "UNIT": "ms"
+        },
+        "DF406": {
+            "NAME": "GNSS signal fine PhaseRange data with extended resolution",
+            "DTYPE": "int:24",
+            "SCALE": 0.0000000004656612873077392578125,
+            "UNIT": "ms"
+        },
+        "DF407": {
+            "NAME": "GNSS PhaseRange Lock Time Indicator with extended range and resolution",
+            "DTYPE": "uint:10"
+        },
+        "DF408": {
+            "NAME": "GNSS signal CNR with extended resolution",
+            "DTYPE": "uint:10",
+            "SCALE": 0.0625,
+            "UNIT": "dB-Hz"
+        },
+        "DF409": {
+            "NAME": "IODS - Issue Of Data Station",
+            "DTYPE": "uint:3"
+        },
+        "DF410": {
+            "NAME": "RESERVED"
+        },
+        "DF411": {
+            "NAME": "Clock Steering Indicator",
+            "DTYPE": "uint:2",
+            "VALUES": ["clock steering is not applied",
+                    "clock steering has been applied",
+                    "unknown clock steering status",
+                    "reserved"]
+        },
+        "DF412": {
+            "NAME": "External Clock Indicator",
+            "DTYPE": "uint:2",
+            "VALUES": ["internal clock is used", 
+                    "external clock is used, clock status is \"locked\"",
+                    "external clock is used, clock status is \"not locked\", which may indicate external clock failure and that the transmitted data may not be reliable",
+                    "unknown clock is used"
+                    ]
+        },
+        "DF413": {
+            "NAME": "IOD SSR",
+            "DTYPE": "uint:2"
+        },
+        "DF414": {
+            "NAME": "SSR Provider ID",
+            "DTYPE": "uint:16"
+        },
+        "DF415": {
+            "NAME": "SSR Solution ID",
+            "DTYPE": "uint:4"
+        },
+        "DF416": {
+            "NAME": "GLONASS Day od Week",
+            "DTYPE": "uint:3",
+            "VALUESS": ["Sunday", 
+                        "Monday", 
+                        "Tuesday", 
+                        "Wednesday", 
+                        "Thursday", 
+                        "Friday", 
+                        "Saturday", 
+                        "The day of week is unknown"]
+        },
+        "DF417": {
+            "NAME": "GNSS Smoothing Type Indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["Divergence-free smoothing is used", 
+                    "Other type of smoothing is used"]
+        },
+        "DF418": {
+            "NAME": "GNSS Smoothing Interval",
+            "DTYPE": "bin:3"
+        },
+        "DF419": {
+            "NAME": "GLONASS Satellite Frequency Channel Number",
+            "DTYPE": "uint:4"
+        },
+        "DF420": {
+            "NAME": "Half-cycle ambiguity indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["No half-cycle ambiguity", 
+                    "Half-cycle ambiguity"]
+        },
+        "DF421": {
+            "NAME": "GLONASS Code-Phase Bias Indicator",
+            "DTYPE": "uint:1",
+            "VALUES": ["The GLONSS pseudorange and PhaseRange observations in the data stream are not aligned to the same measurement epoch.",
+                    "The GLONASS PseudoRange and PhaseRange observations in the data stream are aligned to the same measurement epoch."]
+        },
+        "DF422": {
+            "NAME": "GLONASS FDMA Signals Mask",
+            "DTYPE": "uint:4"
+        },
+        "DF423": {
+            "NAME": "GLONASS L1 C/A Code-Phase Bias",
+            "DTYPE": "int:16",
+            "SCALE": 0.02,
+            "UNIT": "m"
+        },
+        "DF424": {
+            "NAME": "GLONASS L1 P Code-Phase Bias",
+            "DTYPE": "int:16",
+            "SCALE": 0.02,
+            "UNIT": "m"
+        },
+        "DF425": {
+            "NAME": "GLONASS L2 C/A Code-Phase Bias",
+            "DTYPE": "int:16",
+            "SCALE": 0.02,
+            "UNIT": "m"
+        },
+        "DF426": {
+            "NAME": "GLONASS L2 P Code-Phase Bias",
+            "DTYPE": "int:16",
+            "SCALE": 0.02,
+            "UNIT": "m"
+        },
+        "DF427": {
+            "NAME": "BeiDou Epoch Time",
+            "DTYPE": "uint:30",
+            "SCALE": 1,
+            "UNIT": "ms"
+        },
+        "DF428": {
+            "NAME": "QZSS Epoch Time",
+            "DTYPE": "uint:30",
+            "SCALE": 1,
+            "UNIT": "ms"
+        }
+    }    
+}

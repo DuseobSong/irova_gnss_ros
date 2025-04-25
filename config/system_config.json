@@ -1,0 +1,47 @@
+{
+    "COMMON": {
+        "DEVICE": "ZED_F9P_DEV_KIT",
+        "DEFAULT_LATITUDE": ,
+        "DEFAULT_LONGITUDE": ,
+        "DEFAULT_ALTITUDE": ,
+    },
+    "GNSS_SERIAL": {
+        "NMEA_PORT": "/dev/NMEA",
+        "RTCM_PORT": "/dev/RTCM",
+        "NMEA_BAUDRATE": 115200,
+        "RTCM_BAUDRATE": 115200
+    },
+    "NMEA_PARSER": {
+        
+    },
+    "RTCM_PARSER": {
+
+    },
+    "NTRIP_CLIENT": {
+        "BUFFER_SIZE": 4096,
+        "USER": "",
+        "PSWD": "ngii",
+        "PORT": 2101,
+        "CASTER": "",
+        "MOUNTPOINT": "",
+        "USER_AGENT": "NTRIP_CLIENT",
+        "HOST": false,
+        "SSL": false,
+        "V2": false,
+        "UDP_PORT": -1,
+        "MAX_RECONNECT": 0,
+        "RTCM_REQUEST_INTERVAL": 0.1
+    },
+    "GNSS_LOCALIZATION": {
+        "GEOFENCE_ENABLE": false,
+        "EPSG": 5186,
+        "MAP_SCALE": 5,
+        "MAP_PATH": "/map/test.png",
+        "GEOFENCE_PATH": ""
+    },
+    "DATA_LOGGER": {
+        "UPDATE_INTERVAL": 1.0,
+        "LOG_PATH": "",
+        "DATA_TO_SAVE": ["RX_BUFFER", "NMEA", "RTCM"]
+    }
+}

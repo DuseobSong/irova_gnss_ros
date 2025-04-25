@@ -1,0 +1,52 @@
+{
+    "NMEA_LSIT": ["GPGGA", "GPGLL", "GPGSA", "GPRMC", "GPVTG", "GPZDA", "GNGGA", "GNGLL", "GNGSA", "BDGSA", "GPGSV", "BDGSV", "GNRMC", "GNVTG", "GNZDA", "GLGSA"],
+    "DELIMITER":{
+        "START_CHR": "$",
+        "FIELD": ",",
+        "CHKSUM": "\"",
+        "END_ CHR": "\n\r"
+    },
+    "PAYLOAD": {
+        "GGA": ["UTC", "LAT", "NS_IND", "LON", "EW_IND", "GPS_VALID", "N_SAT", "HDOP", "ALT", "GL_SEP", "STA_ID", "CHKSUM"],
+        "GLL": ["LAT", "NS_IND", "LON", "EW_IND", "UTC", "STAT", "CHKSUM"],
+        "GSA": ["MODE", "FIX_TYPE", "SAT_ID", "PDOP", "HDOP", "VDOP", "CHKSUM"],
+        "GSV": ["N_MSG", "SEQ_NO", "N_SAT", "SAT_ID", "ELV", "AZI", "SNR", "CHKSUM"],
+        "RMC": ["UTC", "STAT", "LAT", "NS_IND", "LON", "EW_IND", "SPD", "CRS", "UTC", "MODE"],
+        "VTH": ["CRS", "CRS_M", "SPD", "SPD_K", "MODE", "CHKSUM"],
+        "ZDA": ["UTC", "DAY", "MON", "YEAR", "LC_Z_H", "LC_Z_M", "CHKSUM"]
+    },
+    "FIELDS": {
+        "UTC": "UTC position in hhmmss.ss format (000000.000~235959.999)",
+        "LAT": "Latitude in ddmm.mmmm format, leading zeros are inserted",
+        "NS_IND": "N: North, S: South",
+        "LON": "Longitude in dddmm.mmmm format, leading zeros are inserted",
+        "EW_IND": "E: East, W: West",
+        "GPS_VALID": "GPS quality validity, 0: position fix unavailable, 1: valid position fix, SPS mode, 2: valid position fix, DGPS mode",
+        "N_SAT": "Number of satellites in use (00~24)",
+        "HDOP": "Horizontal dilution if precision (00.0 ~ 99,9)",
+        "ALT": "Mean sea level altitude (-9999.9 ~ 17999.9) in meter",
+        "GL_SEP": "in meter",
+        "STA_ID": "Reference station ID (0000~1023)",
+        "CHKSUM": "dd format",
+        "STAT": "A: data valid, V: data invalid",
+        "MODE": "M: Manual, forced to operate in 2D/3D mode (GSA), A: Automatic, allowed to automatically switch 2D/3D(GSA), Autonomous mode(VTG), N: not valid(VTG), D: Differential mode(VTG), E: Estimated (Dead reckoning) mode (VTG)",
+        "FIX_TYPE": "1: Fix not available, 2: 2D, 3: 3D",
+        "PDOP": "Position dilution of precision (00.0 to 99.9)",
+        "VDOP": "Vertical dilution of precision (00.0 to 99.9)",
+        "N_MSG": "Total number of GSV messages",
+        "SEQ_NO": "Sequence number of current GSV message",
+        "SAT_ID": "GPS: 01-32, SBAS (PRN minus 87): 33~64, GLONASS (64 plus slit numbers): 65~96, QZSS: 192~197, BeiDou (BD PRN): 01~37, max. 5 satellites are included in each GSV sentence",
+        "ELV": "Satellite elevation in degrees, (00~90)",
+        "AZI": "Satellite azimuth angle in degree(000~359)",
+        "SNR": "C/N0 in dB (00~99), Null when not tracking",
+        "SPD": "Speed over ground in knots (000.0 ~ 999.9)",
+        "SPD_K": "Speed over ground, in kilometers per hour (0000.0 ~ 1800.0)",
+        "CRS": "Course over ground, degrees True (000.0 ~ 359.9)",
+        "CRS_M": "Course over ground, degrees Magnetic (000.0 ~ 359.9)",
+        "DAY": "01 ro 31",
+        "MON": "01 to 12",
+        "YEAR": "Four-digit year number",
+        "LC_Z_H": "00 ~ +-13",
+        "LC_Z_M": "00 ~ +59"
+    }
+}
