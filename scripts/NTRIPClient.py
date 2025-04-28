@@ -86,7 +86,7 @@ class NtripClient(object):
     
     def set_parameters(self):
         self.buffer                 = self.parameters["BUFFER_SIZE"]
-        self.user                   = self.parameters["USER"]
+        self.user                   = base64.b64encode(self.parameters["USER"])
         self.port                   = self.parameters["PORT"]
         self.caster                 = self.parameters["CASTER"]
         self.mountpoint             = self.parameters["MOUNTPOINT"]
