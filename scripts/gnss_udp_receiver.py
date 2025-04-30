@@ -117,6 +117,8 @@ class NMEAParser:
         self.last_update_time           = 0.0
 
         self.status_display             = False
+
+        self.rtk_status_update_flag     = False
         
     def string_chksum(self, string):
         val = 0
@@ -186,7 +188,10 @@ class NMEAParser:
         if segments[5] != b'':
             self.e_flag         = segments[5].decode('ascii')
         if segments[6] != b'':
-            self.gps_quality    = self.check_gps_quality(segments[6])
+            tmp_gps_quality     = self.check_gps_quality(segments[6])
+            if tmp_gps_quality != self.gps_quality:
+                self.rtk_status_update_flag = True
+                self.gps_quality = tmp_gps_quality
         if segments[8] != b'':
             self.hdop           = float(segments[8])
         if segments[9] != b'':
@@ -207,10 +212,14 @@ class NMEAParser:
             self.data_validity  = self.check_data_validity(segments[6])
     
     def parse_gsa_msg(self, segments: list):
+        # print(len(segments), segments)
         if segments[1] != b'':
             self.control_mode   = self.check_control_mode(segments[1])
         if segments[2] != b'':
-            self.fix_mode       = self.check_fix_type(segments[2])
+            tmp_fix_mode        = self.check_fix_type(segments[2])
+            if tmp_fix_mode != self.fix_mode:
+                self.rtk_status_update_flag = True
+                self.fix_mode = tmp_fix_mode
         if segments[4] != b'':
             self.pdop           = float(segments[4])
         if segments[5] != b'':
@@ -222,6 +231,7 @@ class NMEAParser:
         pass
     
     def parse_rmc_msg(self, segments: list):
+        # print(len(segments), segments)
         if segments[1] != b'':
             self.UTC            = self.convert_utc(segments[1])
         if segments[2] != b'':
@@ -238,8 +248,8 @@ class NMEAParser:
             self.speed          = float(segments[7])
         if segments[8] != b'':
             self.course         = float(segments[8])
-        if segments[10] != b'':
-            self.mode           = self.check_algorithm_mode(segments[10])
+        if segments[12] != b'':
+            self.mode           = self.check_algorithm_mode(segments[12])
     
     def parse_vtg_msg(self, segments: list):
         if segments[1] != b'':
@@ -251,7 +261,10 @@ class NMEAParser:
         if segments[7] != b'':
             self.speed_kmh      = float(segments[7])
         if segments[9] != b'':
-            self.mode           = self.check_algorithm_mode(segments[9])
+            tmp_mode            = self.check_algorithm_mode(segments[9])
+            if tmp_mode != self.mode:
+                self.rtk_status_update_flag = True
+                self.mode = tmp_mode
         
     def check_gps_quality(self, mark):
         if mark == b'0':
@@ -308,9 +321,23 @@ class NMEAParser:
             return 'Differential mode'
         elif mark == b'E':
             return 'Estimated(Dead-reckoning) mode'
+        elif mark == b'F':
+            return 'RTK-Floting'
+        elif mark == b'R':
+            return 'RTK-Fixed'
+        elif mark == b'M':
+            return 'Manual input'
+        elif mark == b'P':
+            return 'Precise'
+        elif mark == b'S':
+            return 'Simulator'
         else:
             return 'Unidentified'
-        
+    
+    def update_rtk_status(self, rtk_status: Queue):
+        record = (self.gps_quality, self.mode, self.fix_mode)
+        rtk_status.put(record)
+
     def convert_utc(self, barray: bytearray):
         string = barray.decode('ascii')
         res = '{}:{}:{}'.format(string[:2], string[2:4], string[4:])
@@ -349,6 +376,7 @@ class NMEAParser:
     def run(self, 
             nmea_buffer: Queue, 
             localization_info_buffer: Queue, 
+            rtk_status: Queue,
             command_queue: Queue):
         op = True
         print('[NMEA] Parsing thread started.')
@@ -365,7 +393,10 @@ class NMEAParser:
                 
                 for m in messages:
                     self.parse_message_packet(m)
-                    
+            if self.rtk_status_update_flag:
+                self.update_rtk_status(rtk_status)
+                self.rtk_status_update_flag = False
+
             self.update_localization_info(localization_info_buffer)
 
             if self.status_display:
@@ -419,6 +450,12 @@ class Visualizer:
         self.trace_chunk            = np.zeros((self.trace_chunk_size, 7), dtype=float) # UTC, Measurements(E, N, TH)
         self.trace_chunks           = []
         
+        # RTK status
+        self.gps_quality            = 'Unidentified'
+        self.mode                   = 'Unidentified'
+        self.fix_mode               = 'Fix not available'
+        self.rtk_status_colors      = [(0, 0, 0), (0,0,255), (255,20,20), (20,255,20)]
+        
     def check_operation(self, command_queue: Queue):
         if command_queue.qsize() != 0:
             return False
@@ -470,6 +507,27 @@ class Visualizer:
                                                                             self.origin_n),
                     (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0,0,0), 1)
         
+        cv2.rectangle(tmp_map, (0, 980), (999, 999), (200,200,200),-1)
+        if self.gps_quality == 'RTK floating ambiguity solution':
+            c = self.rtk_status_colors[2]
+        elif self.gps_quality == 'RTK fixed ambiguity solution':
+            c = self.rtk_status_colors[3]
+        elif self.gps_quality == 'Position fix unavailable':
+            c = self.rtk_status_colors[1]
+        else:
+            c = self.rtk_status_colors[0]
+        cv2.putText(tmp_map, "{}".format(self.gps_quality), (10, 995), cv2.FONT_HERSHEY_SIMPLEX, 0.4, c, 1)
+        if self.mode == 'RTK-Floating':
+            c = self.rtk_status_colors[2]
+        elif self.mode == 'RTK-Fixed':
+            c = self.rtk_status_colors[3]
+        elif self.mode == 'Data not valid':
+            c = self.rtk_status_colors[1]
+        else:
+            c = self.rtk_status_colors[0]
+        cv2.putText(tmp_map, '{}'.format(self.mode), (410, 995), cv2.FONT_HERSHEY_SIMPLEX, 0.4, c, 1)
+        cv2.putText(tmp_map, '{}'.format(self.fix_mode), (710, 995), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1)
+        
         self.default_map = tmp_map.copy()
         
     def set_origin(self, origin_info):
@@ -482,7 +540,14 @@ class Visualizer:
         self.origin_n_flag      = origin_info[6]
         self.create_default_map()
         # print('RCV: {}'.format(origin_info))
-        
+
+    def update_rtk_status(self, rtk_status):
+        self.gps_quality    = rtk_status[0]
+        self.mode           = rtk_status[1]
+        self.fix_mode       = rtk_status[2]
+
+        self.create_default_map()
+
     def update_scale(self, tmp_markers):
         if tmp_markers[0] == (None, None, None):
             new_e = tmp_markers[1][0]
@@ -579,7 +644,7 @@ class Visualizer:
         
         self.map = tmp_map.copy()
             
-    def run(self, marker_buffer: Queue, origin_buffer: Queue, command_queue: Queue):
+    def run(self, marker_buffer: Queue, origin_buffer: Queue, rtk_status: Queue, command_queue: Queue):
         op = True
         
         print('[VIS] Thread started.')
@@ -589,10 +654,14 @@ class Visualizer:
             if not op:
                 break
             
+            if rtk_status.qsize() != 0:
+                tmp_rtk_status = rtk_status.get()
+                self.update_rtk_status(tmp_rtk_status)
+
             if origin_buffer.qsize() != 0:
                 tmp_origin_data = origin_buffer.get()
                 self.set_origin(tmp_origin_data)
-            
+
             tmp_q_length = marker_buffer.qsize()
             
             for _ in range(tmp_q_length):
@@ -937,6 +1006,7 @@ class Node:
         self.localization_info_buffer   = Queue() # nmea -> loc
         self.marker_buffer              = Queue() # loc -> vis
         self.origin_buffer              = Queue()
+        self.rtk_status                 = Queue()
         
         self.udp_receiver_thread        = None
         self.nmea_parser_thread         = None
@@ -948,10 +1018,10 @@ class Node:
             self.nmea_buffer, self.command_queue
         ))
         self.nmea_parser_thread  = threading.Thread(target=self.nmea_parser.run,  args=(
-            self.nmea_buffer, self.localization_info_buffer, self.command_queue
+            self.nmea_buffer, self.localization_info_buffer, self.rtk_status, self.command_queue
         ))
         self.visualizer_thread   = threading.Thread(target=self.visualizer.run,   args=(
-            self.marker_buffer, self.origin_buffer, self.command_queue
+            self.marker_buffer, self.origin_buffer, self.rtk_status, self.command_queue
         ))
         self.localizer_thread    = threading.Thread(target=self.localizer.run,    args=(
             self.localization_info_buffer, self.marker_buffer, self.origin_buffer, self.command_queue
