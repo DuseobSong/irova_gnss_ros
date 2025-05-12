@@ -5,9 +5,9 @@ import os
 
 from queue import Queue
 import time
+import threading
 import numpy as np
 import pyproj
-import threading
 import cv2
 import datetime
 
