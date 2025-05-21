@@ -53,9 +53,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
-  Monitor.msg
-  Angle.msg
-  Axis.msg
+  # Monitor.msg
+  # Angle.msg
+  # Axis.msg
   GNSS.msg
   # Message1.msg
   # Message2.msg
@@ -179,6 +179,9 @@ catkin_install_python(PROGRAMS
   # scripts/test_codes/course_tracking.py
   # scripts/test_codes/save_course.py
   # scripts/test_codes/course_record.py
+  scripts/move_base.py
+  scripts/zed_f9p_udp.py
+  scripts/zed_f9p_standalone.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

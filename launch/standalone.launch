@@ -45,10 +45,7 @@
     <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" output="screen" required="true"/>
 
     <group if="$(arg enable_gnss)">
-        <node pkg="irova_gnss_ros" type="zed_f9p_udp.py" name="irova_gnss_node" output="screen" required="true">
-        </node>
-
-        <node pkg="irova_gnss_ros" type="move_base.py" name="gnss_move_base" output="screen">
+        <node pkg="irova_gnss_ros" type="zed_f9p_standalone.py" name="irova_gnss_node" output="screen" required="true">
         </node>
     </group>
 
