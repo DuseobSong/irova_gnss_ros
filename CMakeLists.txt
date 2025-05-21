@@ -179,6 +179,7 @@ catkin_install_python(PROGRAMS
   # scripts/test_codes/course_tracking.py
   # scripts/test_codes/save_course.py
   # scripts/test_codes/course_record.py
+  scripts/zed_f9p_prototype.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

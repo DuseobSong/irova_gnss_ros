@@ -1,7 +1,5 @@
 import os, sys
 import rospy
-from geometry_msgs.msg import Twist
-# from irova_gnss_ros.msg import *
 
 import cv2
 
@@ -12,7 +10,6 @@ import socket
 import numpy as np
 import pandas as pd
 import pyproj
-from rospkg import RosPack
 
 import time
 import threading
@@ -23,10 +20,6 @@ Root package : irova_gnss_ros
 Serial node: 
 '''
 
-rp = RosPack()
-ROOT_PKG = 'irova_gnss_ros'
-ROOT_PKG_DIR = rp.get_path(ROOT_PKG)
-
 STANDALONE = True
 
 UDP_CMD_TX_THREAD   = 1
@@ -35,9 +28,12 @@ UDP_DATA_THREAD     = 3
 NMEA_THREAD         = 4
 VISUALIZER_THREAD   = 5
 LOCALIZER_THREAD    = 6
-CONSOLE_THREAD      = 7
+MOVE_BASE_URX       = 7
+MOVE_BASE_UTX       = 8
+CONSOLE_THREAD      = 9
 THREAD_LIST         = [UDP_CMD_TX_THREAD, UDP_CMD_RX_THREAD, UDP_DATA_THREAD, NMEA_THREAD, 
-                       VISUALIZER_THREAD, LOCALIZER_THREAD, CONSOLE_THREAD]
+                       VISUALIZER_THREAD, LOCALIZER_THREAD, MOVE_BASE_URX, MOVE_BASE_UTX,
+                       CONSOLE_THREAD]
 
 HEIGHT              = 500
 WIDTH               = 1200
@@ -50,6 +46,15 @@ def degmin2deg(degmin: float):
 
 def deg2rad(deg):
     return deg * np.pi / 180.0 
+
+def is_roscore_available(robot_ip):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.settimeout(1.0)
+        try:
+            sock.connect((robot_ip, 11311))
+            return True
+        except:
+            return False
  
  
 class UDPReceiver:
@@ -71,7 +76,7 @@ class UDPReceiver:
             line_no     = ''
             fname       = ''
             
-        rospy.logerr('[{}] Error: {}'.format(node_name, exception))
+        print('[{}] Error: {}'.format(node_name, exception))
         print(exc_type, fname, line_no)
         print(traceback.format_exc())
 
@@ -79,13 +84,16 @@ class UDPReceiver:
             ThreadReady: Queue, 
             NmeaBuffer: Queue, 
             Operation: Queue):
-        rospy.loginfo('[GNSS_DATA] Thread started.')
+        print('[GNSS_DATA] Thread started.')
         ThreadReady.put(UDP_DATA_THREAD)
         
         try:
-            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
                 sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-                sock.bind((self.UDP_IP, self.UDP_PORT))
+                if os.name == 'nt':
+                    sock.bind(("", self.UDP_PORT))
+                else:
+                    sock.bind((self.UDP_IP, self.UDP_PORT))
                 sock.settimeout(0.1)
                 
                 while True:
@@ -109,7 +117,7 @@ class UDPReceiver:
         finally:
             Operation.put(False)
             ThreadReady.put(-UDP_DATA_THREAD)
-            rospy.loginfo('[GNSS_DATA] Thread terminated.')
+            print('[GNSS_DATA] Thread terminated.')
             
             
 class NMEAParser:
@@ -156,7 +164,7 @@ class NMEAParser:
             line_no     = ''
             fname       = ''
             
-        rospy.logerr('[{}] Error: {}'.format(node_name, exception))
+        print('[{}] Error: {}'.format(node_name, exception))
         print(exc_type, fname, line_no)
         print(traceback.format_exc())
         
@@ -413,7 +421,7 @@ class NMEAParser:
             LocalizationInfoBuffer: Queue, 
             RtkStatus: Queue,
             Operation: Queue):
-        rospy.loginfo('[NMEA] Parsing thread started.')
+        print('[NMEA] Parsing thread started.')
         ThreadReady.put(NMEA_THREAD)
         
         try:
@@ -441,10 +449,11 @@ class NMEAParser:
                 time.sleep(0.05)
         except Exception as e:
             self.raise_error('NMEA', e)
+            Operation.put(False)
         finally:
             Operation.put(False)
             ThreadReady.put(-NMEA_THREAD)
-            rospy.loginfo('[NMEA] Parsing thread terminated.')
+            print('[NMEA] Parsing thread terminated.')
 
 
 class Localizer:
@@ -530,7 +539,7 @@ class Localizer:
             line_no     = ''
             fname       = ''
             
-        rospy.logerr('[{}] Error: {}'.format(node_name, exception))
+        print('[{}] Error: {}'.format(node_name, exception))
         print(exc_type, fname, line_no)
         print(traceback.format_exc())
 
@@ -751,7 +760,7 @@ class Localizer:
             OriginBuffer: Queue, 
             Operation: Queue,
             LogBuffer: Queue):
-        rospy.loginfo('[LOCALIZER] Thread started.')
+        print('[LOCALIZER] Thread started.')
         ThreadReady.put(LOCALIZER_THREAD)
         try:
             while True:
@@ -768,10 +777,12 @@ class Localizer:
                         # self.kalman_filter(marker_buffer)
         except Exception as e:
             self.raise_error('LOCALIZER', e)
+            Operation.put(False)
         finally:
             Operation.put(False)
             ThreadReady.put(-LOCALIZER_THREAD)
-            rospy.loginfo('[LOCALIZER] Thread terminated.')
+            print('[LOCALIZER] Thread terminated.')
+
 
 class Visualizer:
     def __init__(self):
@@ -832,7 +843,7 @@ class Visualizer:
             line_no     = ''
             fname       = ''
             
-        rospy.logerr('[{}] Error: {}'.format(node_name, exception))
+        print('[{}] Error: {}'.format(node_name, exception))
         print(exc_type, fname, line_no)
         print(traceback.format_exc())
             
@@ -1035,12 +1046,14 @@ class Visualizer:
         self.map = tmp_map.copy()
             
     def run(self, 
+            Command: Queue,
+            MoveBaseCmd: Queue,
             ThreadReady: Queue,
             MarkerBuffer: Queue, 
             OriginBuffer: Queue, 
             RtkStatus: Queue, 
             Operation: Queue):
-        rospy.loginfo('[VIS] Thread started.')
+        print('[VIS] Thread started.')
         ThreadReady.put(VISUALIZER_THREAD)
         
         try:
@@ -1062,8 +1075,6 @@ class Visualizer:
                 
                 for _ in range(tmp_q_length):
                     tmp_markers     = MarkerBuffer.get()
-                    # print(tmp_markers)
-                    # print(tmp_markers)
                     if self.trace_flag:
                         self.trace_chunk[self.trace_record_index,1]         = self.convert_utc(tmp_markers[2])
                         self.trace_chunk[self.trace_record_index,1:]        = tmp_markers[1]
@@ -1078,26 +1089,26 @@ class Visualizer:
                     self.append_point(tmp_markers)
                     self.update_scale(tmp_markers)
                 self.draw_markers()
-                
                 cv2.imshow('res', self.map)
+                key = cv2.waitKey(10) & 0xff
                 
-                key = cv2.waitKey(10) 
-                if key == ord('q'):
+                if key in [ord('w'),ord('x'),ord('a'),ord('s'),ord('d'),ord(' ')]:
+                    MoveBaseCmd.put(key)
+                elif  key in [ord('1'),ord('2'),ord('3'),ord('4')]:
+                    Command.put(key) # int
+                elif key == ord('q'):
                     Operation.put(False)
                     break
                 
-                time.sleep(0.1)
-                
-            try:
-                cv2.destroyAllWindows()
-            except:
-                pass
         except Exception as e:
             self.raise_error('VIS', e)
+            Operation.put(False)
+            
         finally:
             Operation.put(False)
             ThreadReady.put(-VISUALIZER_THREAD)
-            rospy.loginfo('[VIS] Thread terminated.')
+            cv2.destroyWindow('res')
+            print('[VIS] Thread terminated.')
         
         
 class RemoteControl:
@@ -1106,6 +1117,8 @@ class RemoteControl:
         self.UDP_IP                 = udp_ip
         self.UDP_PORT_TX            = 20003
         self.UDP_PORT_RX            = 20002
+        self.MoveBaseUDPTxPort      = 25001
+        self.MoveBaseUDPRxPort      = 25002
         
         self.tx_message             = "No Message"
         self.rx_message             = "No Message"
@@ -1115,6 +1128,7 @@ class RemoteControl:
         self.stop_msg               = b'ROS remote command: stop'
         self.shutdown_msg           = b'ROS remote command: system shutdown'
         self.reboot_msg             = b'ROS remote command: system reboot'
+        # if ROS is running
         self.accel_msg              = b'ROS remote command: accelerate'
         self.decel_msg              = b'ROS remote command: decelerate'
         self.turn_left_msg          = b'ROS remote command: turn left'
@@ -1127,38 +1141,22 @@ class RemoteControl:
         self.stop_resp              = b'ROS robot remote: stop'
         self.shutdown_resp          = b'ROS robot remote: system shutdown'
         self.reboot_resp            = b'ROS robot remote: system reboot'
+        # if ROS is running
         self.accel_resp             = b'ROS robot remote: accelerate'
         self.decel_resp             = b'ROS robot remote: decelerate'
         self.turn_left_resp         = b'ROS robot remote: turn left'
         self.turn_right_resp        = b'ROS robot remote: turn right'
         self.halt_resp              = b'ROS robot remote: halt'
-        
-        self.__rate                 = rospy.Rate(10)
-        
-        self.cmd_vel_lin            = 0.0
-        self.cmd_vel_ang            = 0.0
-        
-        self.v_lin_max              = 0.7
-        self.v_lin_min              = 0.0
-        self.v_ang_min              = deg2rad(-30)
-        self.v_ang_max              = deg2rad(30)
-        self.v_lin_step             = 0.02
-        self.v_ang_step             = deg2rad(5)
-        
+
         self.console_default_image  = None
         self.console_image          = None
         
         self.remote_machine_ready   = False
         
-        self.thread_ready           = [False for _ in range(8)]
+        self.thread_ready           = [False for _ in range(len(THREAD_LIST)+1)]
         self.thread_ready[-1]       = True # console thread
         
-        
-        
         self.remote_control_topic   = '/cmd_vel'
-        
-        self.cmd_vel_pub            = rospy.Publisher(self.remote_control_topic, 
-                                                      Twist, queue_size=10)
         
         self.command_list           = ['1. Launch robot',
                                        '2. Shutdown ROS',
@@ -1186,46 +1184,8 @@ class RemoteControl:
             fname       = ''
             
         print(traceback.format_exc())    
-        rospy.logerr('[{}] Error: {}'.format(node_name, exception))
+        print('[{}] Error: {}'.format(node_name, exception))
         print(exc_type, fname, line_no)
-        
-        
-    def constrain(self, input_vel, lower_b, upper_b):
-        if input_vel < lower_b:
-            input_vel = lower_b
-        elif input_vel > upper_b:
-            input_vel = upper_b
-        else:
-            input_vel = input_vel
-        
-        return input_vel
-    
-    def check_linear_limit_velocity(self, v):
-        return self.constrain(v, self.v_lin_min, self.v_lin_max)
-    
-    def check_angular_limit_velocity(self, w):
-        return self.constrain(w, self.v_ang_min, self.v_ang_max)
-    
-    def publish_cmd_vel_msg(self):
-        msg             = Twist()
-        msg.linear.x    = self.cmd_vel_lin
-        msg.angular.z   = self.cmd_vel_ang
-        self.cmd_vel_pub.publish(msg)
-    
-    def publish_command_message(self, key, Command:Queue, Operation: Queue):
-        ret = True
-        if key in [ord('w'),ord('x'),ord('a'),ord('s'),ord('d'),ord(' '),
-                   ord('1'),ord('2'),ord('3'),ord('4')]:
-            Command.put(key) # int
-        
-        elif key == ord('q'):
-            Operation.put(False)
-            ret = False
-            Command.put(key)
-            self.cmd_vel_lin = 0.0
-            self.cmd_vel_ang = 0.0
-            
-        return ret
     
     def draw_default_console_image(self):
         host_ip         = self.EGO_IP
@@ -1247,16 +1207,16 @@ class RemoteControl:
         cv2.line(tmp_img, (0,HEIGHT- 30), (WIDTH,HEIGHT- 30), line_color, 1)
         
         cv2.putText(tmp_img, 'Server IP: {}'.format(host_ip),   (  5,25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, string_color, 1)
-        cv2.putText(tmp_img, 'UDP IP: {}'.format(udp_ip),       (220,25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, string_color, 1)
-        cv2.putText(tmp_img, 'UDP data port: {}'.format(20000), (420,25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, string_color, 1)
-        cv2.putText(tmp_img, 'UDP TX port: {}'.format(tx_port), (640,25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, string_color, 1)
-        cv2.putText(tmp_img, 'UDP RX port: {}'.format(rx_port), (860,25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, string_color, 1)
+        cv2.putText(tmp_img, 'UDP IP: {}'.format(udp_ip),       (265,25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, string_color, 1)
+        cv2.putText(tmp_img, 'UDP data port: {}'.format(20000), (525,25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, string_color, 1)
+        cv2.putText(tmp_img, 'UDP TX port: {}'.format(tx_port), (725,25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, string_color, 1)
+        cv2.putText(tmp_img, 'UDP RX port: {}'.format(rx_port), (925,25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, string_color, 1)
 
-        cv2.line(tmp_img, ( 210, 0), ( 210, 40), line_color, 1)
-        cv2.line(tmp_img, ( 410, 0), ( 410, 40), line_color, 1)
-        cv2.line(tmp_img, ( 630, 0), ( 630, 40), line_color, 1)
-        cv2.line(tmp_img, ( 850, 0), ( 850, 40), line_color, 1)
-        cv2.line(tmp_img, (1070, 0), (1070, 40), line_color, 1)
+        cv2.line(tmp_img, ( 255, 0), ( 255, 40), line_color, 1)
+        cv2.line(tmp_img, ( 515, 0), ( 515, 40), line_color, 1)
+        cv2.line(tmp_img, ( 715, 0), ( 715, 40), line_color, 1)
+        cv2.line(tmp_img, ( 915, 0), ( 915, 40), line_color, 1)
+        # cv2.line(tmp_img, (1070, 0), (1070, 40), line_color, 1)
 
         cv2.putText(tmp_img, 'Command list',                   ( 15,  60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, string_color, 1)
         cv2.putText(tmp_img, '1. Launch robot',                ( 85,  85), cv2.FONT_HERSHEY_SIMPLEX, 0.4, string_color, 1)
@@ -1304,16 +1264,21 @@ class RemoteControl:
     
         self.console_default_image = tmp_img.copy()
         
-    def udp_tx_task(self, TxMSG: Queue, Command: Queue, ThreadReady: Queue, 
-                    RemoteMachineReady: Queue, Operation: Queue):
-        rospy.loginfo('[CMD_TX] Thread started.')
+    def udp_tx_task(self, 
+                    TxMSG: Queue, 
+                    Command: Queue, 
+                    ThreadReady: Queue, 
+                    RemoteMachineReady: Queue, 
+                    Operation: Queue):
+        
+        print('[CMD_TX] Thread started.')
         ThreadReady.put(UDP_CMD_TX_THREAD)
         try:
             UDP_IP                  = self.UDP_IP
             TX_PORT                 = self.UDP_PORT_TX
             remote_machine_ready    = False
             
-            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
                 sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
                 
                 ThreadReady.put(UDP_CMD_TX_THREAD)
@@ -1374,13 +1339,13 @@ class RemoteControl:
                 sock.close()
         except Exception as e:
             self.raise_error('CMD_TX', e)
+            Operation.put(False)
         finally:
             ThreadReady.put(-UDP_CMD_TX_THREAD)
-            rospy.loginfo('[CMD_TX] Thread terminated.')
+            print('[CMD_TX] Thread terminated.')
         
     def validate_msg(self, msg: bytes, Response: Queue, RemoteMachineReady: Queue):
         if msg == self.connection_resp:
-            # print(RemoteMachineReady.qsize())
             if RemoteMachineReady.qsize() == 0:
                 RemoteMachineReady.put(1)
                 RemoteMachineReady.put(2)
@@ -1393,17 +1358,20 @@ class RemoteControl:
         
     def udp_rx_task(self, Response: Queue, RemoteMachineReady: Queue, 
                     ThreadReady: Queue, Operation: Queue):
-        rospy.loginfo('[CMD_RX] Thread started.')
+        print('[CMD_RX] Thread started.')
         ThreadReady.put(UDP_CMD_RX_THREAD)
         
         try:
             EGO_IP  = self.EGO_IP
             UDP_IP  = self.UDP_IP
             RX_PORT = self.UDP_PORT_RX
-            
-            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            # print(UDP_IP)
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
                 sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-                sock.bind((UDP_IP, RX_PORT))
+                if os.name == 'nt':
+                    sock.bind(("", RX_PORT))
+                else:
+                    sock.bind((UDP_IP, RX_PORT))
                 sock.settimeout(0.5)
                 
                 while True:
@@ -1425,14 +1393,107 @@ class RemoteControl:
                 ThreadReady.put(-UDP_CMD_RX_THREAD)
         except Exception as e:
             self.raise_error('CMD_RX', e)
+            Operation.put(False)
         
         finally:
             Operation.put(False)
             ThreadReady.put(-UDP_CMD_RX_THREAD)
-            rospy.loginfo('[CMD_RX] Thread terminated.')
+            print('[CMD_RX] Thread terminated.')
+    
+    def generate_move_base_msg(self, tmp_msg):
+        cmd_msg = None
+        if tmp_msg == ord('w'):
+            cmd_msg = self.accel_msg
+        elif tmp_msg == ord('x'):
+            cmd_msg = self.decel_msg
+        elif tmp_msg == ord('a'):
+            cmd_msg = self.turn_left_msg
+        elif tmp_msg == ord('d'):
+            cmd_msg = self.turn_right_msg
+        elif tmp_msg in [ord('s'), ord(' ')]:
+            cmd_msg = self.halt_msg
+            
+        return cmd_msg
+    
+    def move_base_tx_task(self,
+                          MoveBaseCmd: Queue,
+                          MoveBaseCmdMsg: Queue,
+                          ThreadReady: Queue,
+                          Operation: Queue):
         
+        print('[MOVE BASE TRX] Thread started.')
+        ThreadReady.put(MOVE_BASE_UTX)
+        EGO_IP = self.EGO_IP
+        UDP_IP = self.UDP_IP
+        MoveBaseUDPTxPort = self.MoveBaseUDPTxPort
         
-    def update_console_image(self, TxMSG, Response, thread_ready, 
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+                
+                while True:
+                    if Operation.qsize() != 0:
+                        break
+                    l = MoveBaseCmd.qsize()
+                    
+                    for _ in range(l):
+                        tmp_cmd = MoveBaseCmd.get()
+                        # print(tmp_cmd)
+                        tmp_move_base_msg = self.generate_move_base_msg(tmp_cmd)    
+                        if tmp_move_base_msg is not None: 
+                            sock.sendto(tmp_move_base_msg, (UDP_IP, MoveBaseUDPTxPort))
+                            MoveBaseCmdMsg.put(tmp_move_base_msg)
+                            time.sleep(0.05)
+                    time.sleep(0.05)
+
+        except Exception as e:
+            self.raise_error('MOVE BASE UTX', e)
+            # print('[MOVE BASE UTX] Error: {}'.format(e))
+            Operation.put(False)
+        finally:
+            ThreadReady.put(-MOVE_BASE_UTX)
+            print('[MOVE BASE UTX] Thread terminated.')
+    
+    def move_base_rx_task(self, 
+                          MoveBaseResp: Queue,
+                          ThreadReady: Queue,
+                          Operation: Queue):
+        print('[MOVE BASE URX] Thread started.')
+        ThreadReady.put(MOVE_BASE_URX)
+        try:
+            EGO_IP = self.EGO_IP
+            MoveBaseUDPRxPort = self.MoveBaseUDPRxPort
+            
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+                
+                sock.bind(("", MoveBaseUDPRxPort))
+                sock.settimeout(0.5)
+                
+                while True:
+                    try:
+                        if Operation.qsize() != 0:
+                            break
+                        data, addr = sock.recvfrom(1024)
+                        if addr[0] != EGO_IP:
+                            if len(data) != 0:
+                                MoveBaseResp.put(data)
+                        time.sleep(0.05)
+                    except socket.timeout:
+                        continue
+                    
+        except Exception as e:
+            self.raise_error('MOVE BASE URX', e)
+            # print('[MOVE BASE URX] Error: {}'.format(e))
+            Operation.put(False)
+        finally:
+            ThreadReady.put(-MOVE_BASE_URX)
+            print('[MOVE BASE URX] Thread terminated.')
+            
+    def update_console_image(self,
+                             TxMSG: Queue,
+                             Response: Queue,
+                             thread_ready, 
                              remote_machine_ready):
         img         = self.console_default_image.copy()
         
@@ -1444,6 +1505,7 @@ class RemoteControl:
                                     LOCALIZER_THREAD, UDP_CMD_TX_THREAD, UDP_CMD_RX_THREAD]):
             x       = int(i // 4)
             y       = int(i  % 4)
+            # print(attrib, len(thread_ready))
             if thread_ready[attrib]:
                 cv2.rectangle(img, (6 + 300*y, HEIGHT - (1-x)*30 - 24), (24 + 300*y, HEIGHT - (1-x)*30 - 6), pos_color, -1)
             else:
@@ -1472,26 +1534,39 @@ class RemoteControl:
         
         ret             = True
         
+        top_left = (150, 85)
+        x_step = 500
+        y_step = 80
         cv2.rectangle(img, (40,40), (WIDTH-40,HEIGHT-40), rect_color, -1)
-        cv2.putText(img, 'GNSS data thread :        ', (310, 85), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
-        cv2.putText(img, 'NMEA parser thread :      ', (310,135), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
-        cv2.putText(img, 'Visualization thread :    ', (310,185), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
-        cv2.putText(img, 'Console thread :          ', (310,235), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
-        cv2.putText(img, 'Localization thread :     ', (310,285), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
-        cv2.putText(img, 'CMD Tx thread :           ', (310,335), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
-        cv2.putText(img, 'CMD Rx thread :           ', (310,385), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
-        cv2.putText(img, 'Robot connection:         ', (310,435), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
+        cv2.putText(img, 'CMD Tx thread :           ', (top_left[0] + x_step * 0, top_left[1]+y_step*0), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
+        cv2.putText(img, 'CMD Rx thread :           ', (top_left[0] + x_step * 0, top_left[1]+y_step*1), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
+        cv2.putText(img, 'GNSS data thread :        ', (top_left[0] + x_step * 0, top_left[1]+y_step*2), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
+        cv2.putText(img, 'NMEA parser thread :      ', (top_left[0] + x_step * 0, top_left[1]+y_step*3), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
+        cv2.putText(img, 'Visualization thread :    ', (top_left[0] + x_step * 0, top_left[1]+y_step*4), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
+        cv2.putText(img, 'Localization thread :     ', (top_left[0] + x_step * 1, top_left[1]+y_step*0), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
+        cv2.putText(img, 'Move base URX thread:     ', (top_left[0] + x_step * 1, top_left[1]+y_step*1), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
+        cv2.putText(img, 'Move base UTX thread:     ', (top_left[0] + x_step * 1, top_left[1]+y_step*2), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
+        cv2.putText(img, 'Console thread :          ', (top_left[0] + x_step * 1, top_left[1]+y_step*3), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
+        cv2.putText(img, 'Robot connection:         ', (top_left[0] + x_step * 1, top_left[1]+y_step*4), cv2.FONT_HERSHEY_SIMPLEX, 0.7, string_color, 2)
+
+        thread_ready[1] = True
+        print(thread_ready)
 
         for i, attrib in enumerate(THREAD_LIST):
+            x_factor = int(i // 5)
+            y_factor = int(i  % 5)
+            
             if thread_ready[attrib]:
-                cv2.putText(img, 'Running', (590, 85 + i*50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, neg_color, 2)
+                cv2.putText(img, 'Running', (top_left[0] + x_step * x_factor + 280, top_left[1] + y_step * y_factor), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, neg_color, 2)
             else:
-                cv2.putText(img, 'Running', (590, 85 + i*50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, pos_color, 2)
+                cv2.putText(img, 'Terminated', (top_left[0] + x_step * x_factor + 280, top_left[1] + y_step * y_factor), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, pos_color, 2)
             
         if remote_machine_ready:
-            cv2.putText(img, 'Connected',    (590,435), cv2.FONT_HERSHEY_SIMPLEX, 0.7, pos_color, 2)
+            cv2.putText(img, 'Connected',    (top_left[0] + x_step + 280, top_left[1]+y_step*4), cv2.FONT_HERSHEY_SIMPLEX, 0.7, pos_color, 2)
         else:
-            cv2.putText(img, 'disconnected', (590,435), cv2.FONT_HERSHEY_SIMPLEX, 0.7, neg_color, 2)
+            cv2.putText(img, 'disconnected', (top_left[0] + x_step + 280, top_left[1]+y_step*4), cv2.FONT_HERSHEY_SIMPLEX, 0.7, neg_color, 2)
         
         self.console_image = img.copy()
         
@@ -1516,11 +1591,16 @@ class RemoteControl:
             else:
                 RemoteMachineReady.put(tmp_n)
             
-    def console_task(self, TxMSG: Queue, Command: Queue, Response: Queue, 
-                     RemoteMachineReady: Queue, ThreadReady: Queue, 
+    def console_task(self, 
+                     TxMSG: Queue, 
+                     Command: Queue, 
+                     MoveBaseCmd: Queue,
+                     Response: Queue, 
+                     RemoteMachineReady: Queue,
+                     ThreadReady: Queue, 
                      Operation: Queue):
         
-        rospy.loginfo('[CONSOLE] Thread started.')
+        print('[CONSOLE] Thread started.')
         try:
             self.draw_default_console_image()
 
@@ -1531,21 +1611,27 @@ class RemoteControl:
                 self.thread_ready_check(ThreadReady)
                 if RemoteMachineReady.qsize() != 0:
                     self.remote_machine_connection_chk(RemoteMachineReady)
-                    
+                
                 self.update_console_image(TxMSG, Response, self.thread_ready, self.remote_machine_ready)
                 
                 cv2.imshow('Console', self.console_image)
                 
                 key = cv2.waitKey(10) & 0xFF                
                 
-                if not self.publish_command_message(key, Command, Operation):
+                if key in [ord('w'),ord('x'),ord('a'),ord('s'),ord('d'),ord(' ')]:
+                    MoveBaseCmd.put(key)
+                elif  key in [ord('1'),ord('2'),ord('3'),ord('4')]:
+                    Command.put(key) # int
+                elif key == ord('q'):
+                    Operation.put(False)
                     break
                 
             # Termination sequence
             start_time = time.time()
             while time.time() - start_time <= 5.0:
                 self.thread_ready_check(ThreadReady)
-                
+                if self.console_image is None:
+                    break
                 ret = self.update_termination_image(self.thread_ready, self.remote_machine_ready)
                 
                 cv2.imshow('Console', self.console_image)
@@ -1554,14 +1640,15 @@ class RemoteControl:
                 if ret:
                     break
             
-            cv2.destroyAllWindows()
+            cv2.destroyWindow("Console")
             
         except Exception as e:
             self.raise_error('CONSOLE', e)
             Operation.put(False)
         
         finally:
-            rospy.loginfo('[CONSOLE] Thread terminated.')
+            print('[CONSOLE] Thread terminated.')
+            
         
 class GNSS:
     def __init__(self, log=False):
@@ -1585,6 +1672,9 @@ class GNSS:
         self.ThreadReady                    = Queue()
         self.Operation                      = Queue()
         self.LogBuffer                      = Queue()
+        self.MoveBaseCmd                    = Queue()
+        self.MoveBaseCmdMsg                 = Queue()
+        self.MoveBaseResp                   = Queue()
         
         self.bringup_console_thread         = None
         self.udp_receiver_thread            = None
@@ -1602,28 +1692,69 @@ class GNSS:
         self.log_chunk                      = pd.DataFrame({}, columns=self.attributes)
         self.log_chunks                     = []
         self.save_flag                      = False
-        self.log_save_path                  = "/home/"+os.environ["USER"]+'/gnss_data/'
+        if os.name == 'nt':
+            self.log_save_path              = os.path.dirname(os.path.realpath(__file__)) + '\\gnss_data\\'
+        else:
+            self.log_save_path                  = "/home/"+os.environ["USER"]+'/gnss_data/'
         self.log_file_index                 = 0
         
         # Shared memories and arguments
-        self.bringup_console_thread_args    = (self.TxMSG, self.Command, self.Response,
-                                               self.RemoteMachineReady, self.ThreadReady,
-                                               self.Operation, )
-        self.udp_receiver_thread_args       = (self.ThreadReady, self.NmeaBuffer, self.Operation, ) # chk
-        self.nmea_parser_thread_args        = (self.ThreadReady, self.NmeaBuffer, 
-                                               self.LocalizationInfoBuffer, self.RtkStatus, 
-                                               self.Operation, ) # chk
-        self.visualizer_thread_args         = (self.ThreadReady, self.MarkerBuffer, 
-                                               self.OriginBuffer, self.RtkStatus, self.Operation, )
-        self.localizer_thread_args          = (self.ThreadReady, self.LocalizationInfoBuffer,
-                                               self.MarkerBuffer, self.OriginBuffer, 
-                                               self.Operation, self.LogBuffer)
-        self.control_tx_thread_args         = (self.TxMSG, self.Command, self.ThreadReady,
-                                               self.RemoteMachineReady, self.Operation, )
-        self.control_rx_thread_args         = (self.Response, self.RemoteMachineReady,
-                                               self.ThreadReady, self.Operation, )
-        
-        self.log_thread_args                = (self.LogBuffer, self.Operation)
+        self.bringup_console_thread_args    = (self.TxMSG, 
+                                               self.Command, 
+                                               self.MoveBaseCmd,
+                                               self.Response,
+                                               self.RemoteMachineReady, 
+                                               self.ThreadReady,
+                                               self.Operation, 
+                                               )
+        self.udp_receiver_thread_args       = (self.ThreadReady, 
+                                               self.NmeaBuffer, 
+                                               self.Operation, 
+                                               ) # chk
+        self.nmea_parser_thread_args        = (self.ThreadReady, 
+                                               self.NmeaBuffer, 
+                                               self.LocalizationInfoBuffer, 
+                                               self.RtkStatus, 
+                                               self.Operation, 
+                                               ) # chk
+        self.visualizer_thread_args         = (self.Command,
+                                               self.MoveBaseCmd,
+                                               self.ThreadReady, 
+                                               self.MarkerBuffer, 
+                                               self.OriginBuffer, 
+                                               self.RtkStatus, 
+                                               self.Operation,
+                                               )
+        self.localizer_thread_args          = (self.ThreadReady, 
+                                               self.LocalizationInfoBuffer,
+                                               self.MarkerBuffer, 
+                                               self.OriginBuffer, 
+                                               self.Operation, 
+                                               self.LogBuffer,
+                                               )
+        self.control_tx_thread_args         = (self.TxMSG, 
+                                               self.Command, 
+                                               self.ThreadReady,
+                                               self.RemoteMachineReady, 
+                                               self.Operation, 
+                                               )
+        self.control_rx_thread_args         = (self.Response, 
+                                               self.RemoteMachineReady,
+                                               self.ThreadReady,
+                                               self.Operation, 
+                                               )
+        self.move_base_urx_thread_args      = (self.MoveBaseResp,
+                                               self.ThreadReady,
+                                               self.Operation,
+                                               )
+        self.move_base_utx_thread_args      = (self.MoveBaseCmd,
+                                               self.MoveBaseCmdMsg,
+                                               self.ThreadReady,
+                                               self.Operation,
+                                               )
+        self.log_thread_args                = (self.LogBuffer, 
+                                               self.Operation,
+                                               )
         
     def raise_error(self, node_name, exception):
         exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -1636,7 +1767,7 @@ class GNSS:
             line_no     = ''
             fname       = ''
             
-        rospy.logerr('[{}] Error: {}'.format(node_name, exception))
+        print('[{}] Error: {}'.format(node_name, exception))
         print(exc_type, fname, line_no)
         print(traceback.format_exc())
     
@@ -1649,6 +1780,8 @@ class GNSS:
         
         self.UDP_IP                 = '{}.{}.{}.255'.format(seg[0], seg[1], seg[2])
         self.udp_port               = 20000
+        
+        # print('UDP IP: ' + self.UDP_IP)
         
         self.udp_receiver           = UDPReceiver(ego_ip=self.ip_addr, udp_ip=self.UDP_IP)
         self.nmea_parser            = NMEAParser()
@@ -1670,6 +1803,10 @@ class GNSS:
                                                        args=self.control_tx_thread_args)
         self.control_rx_thread      = threading.Thread(target=self.controller.udp_rx_task,
                                                        args=self.control_rx_thread_args)
+        self.move_base_urx_thread   = threading.Thread(target=self.controller.move_base_rx_task,
+                                                       args=self.move_base_urx_thread_args)
+        self.move_base_utx_thread   = threading.Thread(target=self.controller.move_base_tx_task,
+                                                       args=self.move_base_utx_thread_args)
         
         if self.LOG_ENABLE:
             self.log_thread         = threading.Thread(target=self.log_task, 
@@ -1681,6 +1818,7 @@ class GNSS:
         if not self.save_flag:
             self.save_flag                      = True
             self.log_save_path += datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            # print(self.log_save_path)
             os.mkdir(self.log_save_path)
             
         self.log_chunk = pd.concat([self.log_chunk, pd.DataFrame([tmp_log], columns=self.attributes)])
@@ -1699,16 +1837,19 @@ class GNSS:
             
     def save_data(self, save_rest=False):
         if len(self.log_chunks) != 0:
-            # print('chk1', len(self.log_chunks))
             for chunk in self.log_chunks:
-                chunk.to_csv(self.log_save_path + '/GNSS_DATA_{}.csv'.format(self.log_file_index), 
-                             columns=self.attributes, 
-                             index=False)
+                if os.name =='nt':
+                    chunk.to_csv(self.log_save_path + '\\GNSS_DATA_{}.csv'.format(self.log_file_index), 
+                                columns=self.attributes, 
+                                index=False)
+                else:
+                    chunk.to_csv(self.log_save_path + '/GNSS_DATA_{}.csv'.format(self.log_file_index), 
+                                columns=self.attributes, 
+                                index=False)
                 self.log_file_index            +=1 
             self.log_chunks                     = []
                 
         if save_rest:
-            # print('chk2', self.log_line_idx)
             if self.log_line_idx != 0:
                 pd.DataFrame(self.log_chunk, columns=self.attributes).to_csv(
                     self.log_save_path + '/GNSS_DATA_{}.csv'.format(self.log_file_index), 
@@ -1717,7 +1858,7 @@ class GNSS:
                 )
             
     def log_task(self, LogBuffer: Queue, Operation: Queue):
-        rospy.loginfo('[DATA LOGGER] Thread started.')
+        print('[DATA LOGGER] Thread started.')
         
         try:
             while True:
@@ -1729,17 +1870,22 @@ class GNSS:
                 for _ in range(tmp_log_len):
                     tmp_log = LogBuffer.get()
                     self.update_log(tmp_log)
+                    
+        except Exception as e:
+            print('[DATA LOGGER] Error: {}'.format(e))
+            Operation.put(False)
                 
         finally:
-            rospy.loginfo('[DATA LOGGER] Saving data ...')
+            print('[DATA LOGGER] Saving data ...')
             try:
                 self.save_data(save_rest=True)
-                rospy.loginfo('[DATA LOGGER] Saving data ... Done!')
+                print('[DATA LOGGER] Saving data ... Done!')
             except Exception as e:
                 self.raise_error('DATA LOGGER', e)
-                rospy.loginfo('[DATA LOGGER] Saving data ... Failed!')
+                print('[DATA LOGGER] Saving data ... Failed!')
         
-        rospy.loginfo('[DATA LOGGER] Thread terminated.')
+        print('[DATA LOGGER] Thread terminated.')
+        
     def run(self):
         self.default_configuration()
         
@@ -1751,11 +1897,13 @@ class GNSS:
             self.localizer_thread.start()
             self.control_tx_thread.start()
             self.control_rx_thread.start()
+            self.move_base_urx_thread.start()
+            self.move_base_utx_thread.start()
             if self.LOG_ENABLE:
                 self.log_thread.start()
         
         except Exception as e:
-            rospy.loginfo('[SYSTEM] Error: {}'.format(e))
+            print('[SYSTEM] Error: {}'.format(e))
             self.Operation.put(False)
             
         finally:
@@ -1771,6 +1919,11 @@ class GNSS:
                 self.control_tx_thread.join()
             if self.control_rx_thread.is_alive():
                 self.control_rx_thread.join()
+            if self.move_base_urx_thread.is_alive():
+                self.move_base_urx_thread.join()
+            if self.move_base_utx_thread.is_alive():
+                self.move_base_utx_thread.join()
+                
             time.sleep(1.0)
             if self.bringup_console_thread.is_alive():
                 self.bringup_console_thread.join()
@@ -1779,9 +1932,26 @@ class GNSS:
 
         
 if __name__ == '__main__':
-    rospy.init_node('GNSS_ZED_F9P')
     STANDALONE = True
     LOG_ENABLE = True
+    
+    remote_ip = os.popen('cat ~/.custom/remote_address').read().split('\n')[0]
+    
+    cnt = 1
+    while True:
+        if not is_roscore_available(remote_ip):
+            print('[REMOTE] Connecting to ROS master ... ({}/10)'.format(cnt))
+            time.sleep(1.0)
+            cnt += 1
+            if cnt == 11:
+                print('[REMOTE] ROS master not reachable')
+                sys.exit(-1)
+            else:
+                continue
+        else:
+            break
+    
+    rospy.init_node('REMOTE', anonymous=False)
     
     node = GNSS(LOG_ENABLE)
     

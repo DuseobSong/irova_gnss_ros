@@ -1,0 +1,4 @@
+<launch>
+    <node name="remote" pkg="irova_gnss_ros" type="zed_f9p_prototype.py" output="screen"    >
+    </node>
+</launch>
